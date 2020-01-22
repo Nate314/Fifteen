@@ -20,5 +20,6 @@ public class MyFrame extends JFrame {
         this.add(panel);
         this.addKeyListener(new MyKeyListener((key) -> game.key(key)));
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+        this.setLocation(Constants.WINDOW_X, Constants.WINDOW_Y);
     }
 }

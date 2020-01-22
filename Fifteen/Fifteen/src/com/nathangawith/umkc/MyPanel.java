@@ -7,6 +7,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Rectangle;
 import javax.swing.JPanel;
+import java.lang.Thread;
 
 @SuppressWarnings("serial")
 public class MyPanel extends JPanel {
@@ -15,6 +16,9 @@ public class MyPanel extends JPanel {
     final int boardSize;
     final int tilesWide;
     final int tileWidth;
+
+    // private int mixingCounter = 0;
+    // private final int mixMax = 3; // mix for 10 seconds at 60 fps
 
     /**
      * Panel used to paint current state of the game
@@ -26,17 +30,34 @@ public class MyPanel extends JPanel {
         this.boardSize = game.getBoardSize();
         this.tilesWide = game.getTilesWide();
         this.tileWidth = this.boardSize / this.tilesWide;
+        JPanel me = this;
+        Thread uiReDrawThread = new Thread(
+            new Runnable() {
+                @Override
+                public void run() {
+                    while (true) {
+                        try {
+                            Thread.sleep((int) 1000 / 60); // 60 fps
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        me.repaint();
+                    }
+                }
+            }
+        );
+        uiReDrawThread.start();
     }
 
     /**
      * Calculates position of tile[i][j]
-     * @param i ith tile to paint
-     * @param j jth tile to paint
+     * @param row rowof the tile to paint
+     * @param col column of the tile to paint
      * @return returns x and y position of the specified tile
      */
-    public Dimension getPosition(int i, int j) {
-        int x = (i * this.tileWidth) + Constants.GUTTER_SIZE;
-        int y = (j * this.tileWidth) + Constants.GUTTER_SIZE;
+    public Dimension getPosition(int row, int col) {
+        int x = (col * this.tileWidth) + Constants.GUTTER_SIZE;
+        int y = (row * this.tileWidth) + Constants.GUTTER_SIZE;
         return new Dimension(x, y);
     }
 
@@ -48,12 +69,13 @@ public class MyPanel extends JPanel {
     public void paint(Graphics g) {
         super.paint(g);
         this.drawBackground(g);
-        for (int i = 0; i < this.tilesWide; i++) {
-            for (int j = 0; j < this.tilesWide; j++) {
-                String text = this.game.getTextForTile(i, j);
-                if (text != null) this.drawSquare(g, i, j, text);
+        for (int row = 0; row < this.tilesWide; row++) {
+            for (int col = 0; col < this.tilesWide; col++) {
+                String text = this.game.getTextForTile(row, col);
+                if (text != null) this.drawSquare(g, row, col, text);
             }
         }
+        // this.repaint();
     }
 
     /**
@@ -61,28 +83,28 @@ public class MyPanel extends JPanel {
      * @param g Graphics object used to draw
      */
     private void drawBackground(Graphics g) {
-        g.setColor(Constants.BACKGROUND_COLOR);
+        g.setColor(Constants.COLOR_BACKGROUND);
         g.fillRect(0, 0, boardSize, boardSize);
     }
 
     /**
      * draws one square on the board
      * @param g Graphics object used to draw
-     * @param i row number to draw
-     * @param j column number to draw
+     * @param row row number to draw
+     * @param col column number to draw
      * @param text text to draw on the square
      */
-    private void drawSquare(Graphics g, int i, int j, String text) {
+    private void drawSquare(Graphics g, int row, int col, String text) {
         // draw square
-        g.setColor(Constants.FOREGROUND_COLOR);
-        Dimension pos = this.getPosition(i, j);
+        g.setColor(Constants.COLOR_FOREGROUND);
+        Dimension pos = this.getPosition(row, col);
         int x = (int) pos.getWidth(),
             y = (int) pos.getHeight(),
             w = this.tileWidth - (2 * Constants.GUTTER_SIZE),
             h = this.tileWidth - (2 * Constants.GUTTER_SIZE);
         g.fillRect(x, y, w, h);
         // draw text
-        g.setColor(Constants.TEXT_COLOR);
+        g.setColor(Constants.COLOR_TEXT);
         Font font = new Font("Consolas", Font.BOLD, (int) (this.tileWidth * 0.55));
         this.drawCenteredText(g, font, text, new Rectangle(x, y, w, h));
     }

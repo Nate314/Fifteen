@@ -8,10 +8,21 @@ public final class Constants {
     public static final Color MD_LIGHT_BLUE = new Color(94, 146, 243);
     public static final Color MD_DARK_BLUE = new Color(0, 60, 143);
     public static final Color MD_WHITE = new Color(255, 255, 255);
+    public static final Color MD_RED = new Color(255, 0, 0);
+    public static final Color MD_GREEN = new Color(0, 255, 0);
+    // application colors
+    public static final Color COLOR_BACKGROUND = MD_PRIMARY_BLUE;
+    public static final Color COLOR_FOREGROUND = MD_LIGHT_BLUE;
+    public static final Color COLOR_ALL_CORRECT = MD_GREEN;
+    public static final Color COLOR_MIXING = MD_RED;
+    public static Color COLOR_TEXT = MD_WHITE;
+    // board sizing integers
     public static final int BOARD_SIZE = 4;
-    public static final int TILE_WIDTH = 100;
-    public static final int GUTTER_SIZE = 10;
-    public static final Color BACKGROUND_COLOR = MD_PRIMARY_BLUE;
-    public static final Color FOREGROUND_COLOR = MD_LIGHT_BLUE;
-    public static final Color TEXT_COLOR = MD_WHITE;
+    public static final int TILE_WIDTH = 120;
+    public static final int GUTTER_SIZE = 8;
+    public static final int WINDOW_X = 0; // 1920;
+    public static final int WINDOW_Y = 0; // -500;
+    // other constants
+    public static final int MIXING_FREQUENCY = 1000 / 60; // mix at 60fps
+    public static final int MIXING_NUMBER = 60 * 3;       // for three seconds
 }

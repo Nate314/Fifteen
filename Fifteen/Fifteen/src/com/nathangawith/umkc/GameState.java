@@ -1,14 +1,19 @@
 package com.nathangawith.umkc;
 
+import java.awt.Dimension;
+import java.util.Random;
+import java.lang.Thread;
+
 public class GameState {
 
-    /**
-     * game constants
-     */
+    // private fields
     private final int tilesWide;
     private final int boardSize;
+    private GameBoard board;
+    // public fields
     public final int getTilesWide() { return tilesWide; }
     public final int getBoardSize() { return boardSize; }
+    public boolean inSession = false;
 
     /**
      * constructor for a Fifteen Game GameState class
@@ -18,6 +23,30 @@ public class GameState {
     public GameState(int tilesWide, int tileSize) {
         this.tilesWide = tilesWide;
         this.boardSize = tilesWide * tileSize;
+        this.board = new GameBoard(tilesWide);
+        MyKey[] keys = new MyKey[] {MyKey.UP, MyKey.DOWN, MyKey.LEFT, MyKey.RIGHT};
+        Random random = new Random();
+        this.inSession = false;
+        this.calculateColors();
+        GameState me = this;
+        Thread mixingThread = new Thread(
+            new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(100);
+                        for (int i = 0; i < Constants.MIXING_NUMBER; i++) {
+                            int index = random.nextInt(4);
+                            me.key(keys[index]);
+                            Thread.sleep(Constants.MIXING_FREQUENCY);
+                        }
+                    } catch (Exception ex) { }
+                    me.inSession = true;
+                    me.calculateColors();
+                }
+            }
+        );
+        mixingThread.start();
     }
 
     /**
@@ -26,9 +55,19 @@ public class GameState {
      * @return the text for the specified tile
      */
     public String getTextForTile(int i, int j) {
-        return (i + 1) * (j + 1) < 16
-            ? ((i + 1) * (j + 1)) + ""
-            : null;
+        return this.board.getTile(i, j).getLabel();
+    }
+
+    public void calculateColors() {
+        if (this.inSession) {
+            if (this.board.isFinished()) {
+                Constants.COLOR_TEXT = Constants.COLOR_ALL_CORRECT;
+            } else {
+                Constants.COLOR_TEXT = Constants.MD_WHITE;
+            }
+        } else {
+            Constants.COLOR_TEXT = Constants.COLOR_MIXING;
+        }
     }
 
     /**
@@ -36,22 +75,39 @@ public class GameState {
      * @param key key that was pressed
      */
     public void key(MyKey key) {
+        // find blank tile
+        Dimension blankTilePosition = this.board.getBlankTilePosition();
+        int blankRow = (int) blankTilePosition.getWidth(), blankCol = (int) blankTilePosition.getHeight();
+        if (blankRow == -1 || blankCol == -1) return;
         switch (key) {
             case UP:
-                System.out.println("UP");
+                if (blankRow < this.tilesWide - 1) {
+                    System.out.print(" UP");
+                    this.board.swapTiles(blankRow, blankCol, blankRow + 1, blankCol);
+                }
                 break;
             case DOWN:
-                System.out.println("DOWN");
+                if (blankRow > 0) {
+                    System.out.print(" DOWN");
+                    this.board.swapTiles(blankRow, blankCol, blankRow - 1, blankCol);
+                }
                 break;
             case LEFT:
-                System.out.println("LEFT");
+                if (blankCol < this.tilesWide - 1) {
+                    System.out.print(" LEFT");
+                    this.board.swapTiles(blankRow, blankCol, blankRow, blankCol + 1);
+                }
                 break;
             case RIGHT:
-                System.out.println("RIGHT");
+                if (blankCol > 0) {
+                    System.out.print(" RIGHT");
+                    this.board.swapTiles(blankRow, blankCol, blankRow, blankCol - 1);
+                }
                 break;
             default:
                 break;
         }
+        this.calculateColors();
     }
 
 }
