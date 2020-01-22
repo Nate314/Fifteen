@@ -18,35 +18,38 @@ public class GameState {
     /**
      * constructor for a Fifteen Game GameState class
      * @param tilesWide number of tiles wide to make the game (e.g. Fifteen is typically 4 tiles wide)
-     * @param tileSize width and height of each tile
+     * @param mixItUp if true, then the board will be mixed prior to gameplay
      */
-    public GameState(int tilesWide, int tileSize) {
+    public GameState(int tilesWide, Integer[] tileLabels, boolean mixItUp) {
         this.tilesWide = tilesWide;
-        this.boardSize = tilesWide * tileSize;
-        this.board = new GameBoard(tilesWide);
+        this.boardSize = tilesWide * Constants.TILE_WIDTH;
+        this.board = tileLabels != null
+            ? new GameBoard(tilesWide, tileLabels) : new GameBoard(tilesWide);
         MyKey[] keys = new MyKey[] {MyKey.UP, MyKey.DOWN, MyKey.LEFT, MyKey.RIGHT};
         Random random = new Random();
-        this.inSession = false;
-        this.calculateColors();
-        GameState me = this;
-        Thread mixingThread = new Thread(
-            new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        Thread.sleep(100);
-                        for (int i = 0; i < Constants.MIXING_NUMBER; i++) {
-                            int index = random.nextInt(4);
-                            me.key(keys[index]);
-                            Thread.sleep(Constants.MIXING_FREQUENCY);
-                        }
-                    } catch (Exception ex) { }
-                    me.inSession = true;
-                    me.calculateColors();
+        if (mixItUp) {
+            this.inSession = false;
+            this.calculateColors();
+            GameState me = this;
+            Thread mixingThread = new Thread(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Thread.sleep(100);
+                            for (int i = 0; i < Constants.MIXING_NUMBER; i++) {
+                                int index = random.nextInt(4);
+                                me.key(keys[index]);
+                                Thread.sleep(Constants.MIXING_FREQUENCY);
+                            }
+                        } catch (Exception ex) { }
+                        me.inSession = true;
+                        me.calculateColors();
+                    }
                 }
-            }
-        );
-        mixingThread.start();
+            );
+            mixingThread.start();
+        }
     }
 
     /**

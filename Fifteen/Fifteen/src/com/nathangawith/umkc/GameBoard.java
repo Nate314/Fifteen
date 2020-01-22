@@ -2,26 +2,55 @@ package com.nathangawith.umkc;
 
 import java.awt.Dimension;
 import java.util.Arrays;
+import java.util.function.Function;
 
 public class GameBoard {
 
     private GameTile[][] tiles;
     private int size;
 
+    /**
+     * constructor if only the size of the board is known
+     * @param size width of the board in tiles
+     */
     public GameBoard(int size) {
-        this.size = size;
-        int counter = 1;
         int sizeSquared = size * size;
+        Function<Integer, Integer> func = (c) -> c < sizeSquared - 1 ? c + 1 : null;
+        this.constructor(size, func);
+    }
+
+    /**
+     * constructor if the size of the board and all of the labels are known
+     * @param size width of the board in tiles
+     * @param tileLabels array of Integers representing each tile on the board
+     */
+    public GameBoard(int size, Integer[] tileLabels) {
+        Function<Integer, Integer> func = (c) -> tileLabels[c] != null ? tileLabels[c] : null;
+        this.constructor(size, func);
+    }
+
+    /**
+     * generic constructor used by both of the above constructors
+     * @param size tile width of the board
+     * @param func function used to get the ith tile
+     */
+    private void constructor(int size, Function<Integer, Integer> func) {
+        this.size = size;
+        int counter = 0;
         tiles = new GameTile[size][size];
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                Integer num = counter < sizeSquared ? counter : null;
+                Integer num = func.apply(counter);
                 tiles[i][j] = new GameTile(num);
                 counter++;
             }
         }
     }
 
+    /**
+     * searches all tiles until the blank tile is found
+     * @return the position of the blank tile
+     */
     public Dimension getBlankTilePosition() {
         int blankRow = -1, blankCol = -1;
         for (int i = 0; i < this.size; i++) {
@@ -32,10 +61,17 @@ public class GameBoard {
                     break;
                 }
             }
+            if (blankRow != -1 || blankCol != -1) break;
         }
         return new Dimension(blankRow, blankCol);
     }
 
+    /**
+     * returns the tile for the specified row and column
+     * @param row row to retrieve the tile from
+     * @param col column to retrieve the tile from
+     * @return the tile at the specified row and column
+     */
     public GameTile getTile(int i, int j) {
         if (i < this.tiles.length) {
             if (j < this.tiles[i].length) {

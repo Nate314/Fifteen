@@ -17,7 +17,7 @@ public final class Constants {
     public static final Color COLOR_MIXING = MD_RED;
     public static Color COLOR_TEXT = MD_WHITE;
     // board sizing integers
-    public static final int BOARD_SIZE = 4;
+    public static final int BOARD_SIZE = 3;
     public static final int TILE_WIDTH = 120;
     public static final int GUTTER_SIZE = 8;
     public static final int WINDOW_X = 0; // 1920;
@@ -25,4 +25,6 @@ public final class Constants {
     // other constants
     public static final int MIXING_FREQUENCY = 1000 / 60; // mix at 60fps
     public static final int MIXING_NUMBER = 60 * 3;       // for three seconds
+    // AI constants
+    public static final String FILE_NAME = "program_1_data.txt";
 }
