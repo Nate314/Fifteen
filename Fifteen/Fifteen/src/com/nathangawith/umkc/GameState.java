@@ -21,6 +21,17 @@ public class GameState {
     }
 
     /**
+     * @param i row
+     * @param j column
+     * @return the text for the specified tile
+     */
+    public String getTextForTile(int i, int j) {
+        return (i + 1) * (j + 1) < 16
+            ? ((i + 1) * (j + 1)) + ""
+            : null;
+    }
+
+    /**
      * manipulates game state based on key that was pressed
      * @param key key that was pressed
      */
