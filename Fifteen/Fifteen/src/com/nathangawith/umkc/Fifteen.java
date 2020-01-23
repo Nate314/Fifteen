@@ -6,7 +6,8 @@ public class Fifteen {
      * @param args
      */
     public static void main(String[] args) {
-        new MyFrame(new GameState(Constants.BOARD_SIZE, null, true));
-        // new AI();
+        // new MyFrame(new GameState(null, true));
+        // new MyFrame(new GameState(null, false));
+        new AI();
     }
 }

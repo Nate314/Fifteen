@@ -5,14 +5,13 @@ import javax.swing.JPanel;
 
 @SuppressWarnings("serial")
 public class MyFrame extends JFrame {
-
     /**
      * Window that the game runs inside of
      * @param game GameState object
      */
     public MyFrame(GameState game) {
         JPanel panel = new MyPanel(game);
-        int boardSize = game.getBoardSize();
+        int boardSize = Constants.BOARD_SIZE * Constants.TILE_WIDTH;
         this.setVisible(true);
         this.setSize(boardSize + 5, boardSize + 30);
         this.setResizable(false);

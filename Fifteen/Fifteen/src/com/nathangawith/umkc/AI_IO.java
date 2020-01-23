@@ -34,7 +34,7 @@ public class AI_IO {
         games = new GameState[boards.size()];
         for (ArrayList<Integer> numbers : boards) {
             Integer[] arr = this.toArray(numbers);
-            games[i++] = new GameState(Constants.BOARD_SIZE, arr, false);
+            games[i++] = new GameState(arr, false);
         }
     }
 

@@ -19,7 +19,7 @@ public final class Constants {
     // board sizing integers
     public static final int BOARD_SIZE = 3;
     public static final int TILE_WIDTH = 120;
-    public static final int GUTTER_SIZE = 8;
+    public static final int GUTTER_SIZE = 6;
     public static final int WINDOW_X = 0; // 1920;
     public static final int WINDOW_Y = 0; // -500;
     // other constants

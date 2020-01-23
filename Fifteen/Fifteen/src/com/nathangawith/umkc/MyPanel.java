@@ -10,12 +10,10 @@ import javax.swing.JPanel;
 import java.lang.Thread;
 
 @SuppressWarnings("serial")
-public class MyPanel extends JPanel {
+public class MyPanel extends JPanel implements MyEventInterface {
 
     final GameState game;
     final int boardSize;
-    final int tilesWide;
-    final int tileWidth;
 
     // private int mixingCounter = 0;
     // private final int mixMax = 3; // mix for 10 seconds at 60 fps
@@ -27,9 +25,8 @@ public class MyPanel extends JPanel {
     public MyPanel(GameState game) {
         super();
         this.game = game;
-        this.boardSize = game.getBoardSize();
-        this.tilesWide = game.getTilesWide();
-        this.tileWidth = this.boardSize / this.tilesWide;
+        this.game.setMyEventListener(this);
+        this.boardSize = Constants.BOARD_SIZE * Constants.TILE_WIDTH;
         JPanel me = this;
         Thread uiReDrawThread = new Thread(
             new Runnable() {
@@ -50,14 +47,22 @@ public class MyPanel extends JPanel {
     }
 
     /**
+     * sets the text color to the appropriate game state color
+     */
+    public void calculateColors() {
+        Constants.COLOR_TEXT = this.game.getIsMixing() ? Constants.COLOR_MIXING
+            : this.game.getGameBoard().isFinished() ? Constants.COLOR_ALL_CORRECT : Constants.MD_WHITE;
+    }
+
+    /**
      * Calculates position of tile[i][j]
      * @param row rowof the tile to paint
      * @param col column of the tile to paint
      * @return returns x and y position of the specified tile
      */
     public Dimension getPosition(int row, int col) {
-        int x = (col * this.tileWidth) + Constants.GUTTER_SIZE;
-        int y = (row * this.tileWidth) + Constants.GUTTER_SIZE;
+        int x = (col * Constants.TILE_WIDTH) + Constants.GUTTER_SIZE;
+        int y = (row * Constants.TILE_WIDTH) + Constants.GUTTER_SIZE;
         return new Dimension(x, y);
     }
 
@@ -69,8 +74,8 @@ public class MyPanel extends JPanel {
     public void paint(Graphics g) {
         super.paint(g);
         this.drawBackground(g);
-        for (int row = 0; row < this.tilesWide; row++) {
-            for (int col = 0; col < this.tilesWide; col++) {
+        for (int row = 0; row < Constants.BOARD_SIZE; row++) {
+            for (int col = 0; col < Constants.BOARD_SIZE; col++) {
                 String text = this.game.getTextForTile(row, col);
                 if (text != null) this.drawSquare(g, row, col, text);
             }
@@ -100,12 +105,12 @@ public class MyPanel extends JPanel {
         Dimension pos = this.getPosition(row, col);
         int x = (int) pos.getWidth(),
             y = (int) pos.getHeight(),
-            w = this.tileWidth - (2 * Constants.GUTTER_SIZE),
-            h = this.tileWidth - (2 * Constants.GUTTER_SIZE);
+            w = Constants.TILE_WIDTH - (2 * Constants.GUTTER_SIZE),
+            h = Constants.TILE_WIDTH - (2 * Constants.GUTTER_SIZE);
         g.fillRect(x, y, w, h);
         // draw text
         g.setColor(Constants.COLOR_TEXT);
-        Font font = new Font("Consolas", Font.BOLD, (int) (this.tileWidth * 0.55));
+        Font font = new Font("Consolas", Font.BOLD, (int) (Constants.TILE_WIDTH * 0.55));
         this.drawCenteredText(g, font, text, new Rectangle(x, y, w, h));
     }
 
@@ -129,5 +134,13 @@ public class MyPanel extends JPanel {
             ((rectangleWidth - fm.stringWidth(text)) / 2) + rectangleX,
             ((rectangleHeight - fm.getHeight()) / 2) + fm.getAscent() + rectangleY);
         g2d.dispose();
+    }
+
+    /**
+     * when the game state changes
+     */
+    @Override
+    public void handle() {
+        this.calculateColors();
     }
 }

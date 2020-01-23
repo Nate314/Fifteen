@@ -3,6 +3,7 @@ package com.nathangawith.umkc;
 import java.awt.Dimension;
 import java.util.Arrays;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class GameBoard {
 
@@ -11,40 +12,74 @@ public class GameBoard {
 
     /**
      * constructor if only the size of the board is known
-     * @param size width of the board in tiles
      */
-    public GameBoard(int size) {
-        int sizeSquared = size * size;
+    public GameBoard() {
+        int sizeSquared = Constants.BOARD_SIZE * Constants.BOARD_SIZE;
         Function<Integer, Integer> func = (c) -> c < sizeSquared - 1 ? c + 1 : null;
-        this.constructor(size, func);
+        this.constructor(func);
     }
 
     /**
      * constructor if the size of the board and all of the labels are known
-     * @param size width of the board in tiles
      * @param tileLabels array of Integers representing each tile on the board
      */
-    public GameBoard(int size, Integer[] tileLabels) {
+    public GameBoard(Integer[] tileLabels) {
         Function<Integer, Integer> func = (c) -> tileLabels[c] != null ? tileLabels[c] : null;
-        this.constructor(size, func);
+        this.constructor(func);
+    }
+
+    /**
+     * copy constructor
+     * @param board board to copy
+     */
+    public GameBoard(GameBoard board) {
+        Function<Integer, Integer> func = (c) -> {
+            int row = c / board.size;
+            int col = c % board.size;
+            String str = board.getTile(row, col).getLabel();
+            return str == null ? null : Integer.parseInt(board.getTile(row, col).getLabel());
+        };
+        this.constructor(func);
     }
 
     /**
      * generic constructor used by both of the above constructors
-     * @param size tile width of the board
      * @param func function used to get the ith tile
      */
-    private void constructor(int size, Function<Integer, Integer> func) {
-        this.size = size;
+    private void constructor(Function<Integer, Integer> func) {
+        this.size = Constants.BOARD_SIZE;
         int counter = 0;
         tiles = new GameTile[size][size];
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
+        for (int row = 0; row < size; row++) {
+            for (int col = 0; col < size; col++) {
                 Integer num = func.apply(counter);
-                tiles[i][j] = new GameTile(num);
+                tiles[row][col] = new GameTile(num);
                 counter++;
             }
         }
+    }
+
+    /**
+     * prints out console friendly game board
+     */
+    public void print() {
+        // String str = "";
+        // for (GameTile[] row : this.tiles) {
+        //     str += String.join(" ", Arrays.asList(row).stream().map(tile -> tile.getLabel() == null ? " " : tile.getLabel()).collect(Collectors.toList()));
+        //     str += "\n";
+        // }
+        // System.out.println(str);
+        System.out.println(
+            String.join("\n",
+                Arrays.asList(this.tiles).stream().map(
+                    row -> String.join(" ",
+                        Arrays.asList(row).stream().map(
+                            tile -> tile.getLabel() == null ? " " : tile.getLabel()
+                        ).collect(Collectors.toList())
+                    )
+                ).collect(Collectors.toList())
+            ) + "\n"
+        );
     }
 
     /**
@@ -53,11 +88,11 @@ public class GameBoard {
      */
     public Dimension getBlankTilePosition() {
         int blankRow = -1, blankCol = -1;
-        for (int i = 0; i < this.size; i++) {
-            for (int j = 0; j < this.size; j++) {
-                if (this.getTile(i, j).getLabel() == null) {
-                    blankRow = i;
-                    blankCol = j;
+        for (int row = 0; row < this.size; row++) {
+            for (int col = 0; col < this.size; col++) {
+                if (this.getTile(row, col).getLabel() == null) {
+                    blankRow = row;
+                    blankCol = col;
                     break;
                 }
             }
@@ -72,14 +107,14 @@ public class GameBoard {
      * @param col column to retrieve the tile from
      * @return the tile at the specified row and column
      */
-    public GameTile getTile(int i, int j) {
-        if (i < this.tiles.length) {
-            if (j < this.tiles[i].length) {
-                return this.tiles[i][j];
+    public GameTile getTile(int row, int col) {
+        if (row < this.tiles.length) {
+            if (col < this.tiles[row].length) {
+                return this.tiles[row][col];
             }
         }
         String exceptionMessage = "The index you passed in (%d, %d) was out of bounds! (Size is %d)";
-        throw new IndexOutOfBoundsException(String.format(exceptionMessage, i, j, this.tiles.length));
+        throw new IndexOutOfBoundsException(String.format(exceptionMessage, row, col, this.tiles.length));
     }
 
     /**
@@ -89,10 +124,22 @@ public class GameBoard {
      * @param row2 row of the second tile to swap
      * @param col2 column of the second tile to swap
      */
-    public void swapTiles(int row1, int col1, int row2, int col2) {
+    private void swapTiles(int row1, int col1, int row2, int col2) {
         GameTile temp = this.tiles[row1][col1];
         this.tiles[row1][col1] = this.tiles[row2][col2];
         this.tiles[row2][col2] = temp;
+    }
+
+    /**
+     * swaps the specified tile with the blank tile
+     * @param row row of the tile to move
+     * @param col column of the tile to move
+     */
+    public void moveTile(int row, int col) {
+        Dimension blankTilePosition = this.getBlankTilePosition();
+        int x = (int) blankTilePosition.getWidth(),
+            y = (int) blankTilePosition.getHeight();
+        this.swapTiles(x, y, row, col);
     }
 
     /**
