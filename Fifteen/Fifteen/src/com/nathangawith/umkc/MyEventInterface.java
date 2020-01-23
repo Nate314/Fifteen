@@ -1,5 +1,8 @@
 package com.nathangawith.umkc;
 
+/**
+ * Interface used to emit an event whenever the GameState changes
+ */
 public interface MyEventInterface {
-    void handle();
+    public void handle();
 }

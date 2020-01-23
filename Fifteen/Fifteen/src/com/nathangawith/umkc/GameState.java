@@ -1,26 +1,22 @@
 package com.nathangawith.umkc;
 
-import java.awt.Dimension;
 import java.util.Random;
 import java.lang.Thread;
 
 public class GameState {
 
-    private final int tilesWide;
     private GameBoard board;
     private boolean isMixing = false;
-    public boolean getIsMixing() {
-        return this.isMixing;
-    }
-    public GameBoard getGameBoard() {
-        return new GameBoard(this.board);
-    }
-
+    public boolean getIsMixing() { return this.isMixing; }
+    public GameBoard getGameBoard() { return new GameBoard(this.board); }
     // event listener for whoever wants to subscribe to game events
     // code from https://stackoverflow.com/questions/33948916/java-custom-event-handler-and-listeners/33950694
     private MyEventInterface gameUpdateInterface;
-    public void setMyEventListener(MyEventInterface listener) {
-        this.gameUpdateInterface = listener;
+    public void setMyEventListener(MyEventInterface listener) { this.gameUpdateInterface = listener; }
+    private void fireGameUpdateEvent() {
+        if (this.gameUpdateInterface != null) {
+            this.gameUpdateInterface.handle();
+        }
     }
 
     /**
@@ -31,19 +27,9 @@ public class GameState {
      * @param mixItUp if true, then the board will be mixed prior to gameplay
      */
     public GameState(Integer[] tileLabels, boolean mixItUp) {
-        this.tilesWide = Constants.BOARD_SIZE;
         this.board = tileLabels != null
             ? new GameBoard(tileLabels) : new GameBoard();
         if (mixItUp) this.mix();
-    }
-
-    /**
-     * emits game update event to listener
-     */
-    private void fireGameUpdateEvent() {
-        if (this.gameUpdateInterface != null) {
-            this.gameUpdateInterface.handle();
-        }
     }
 
     /**
@@ -76,52 +62,16 @@ public class GameState {
     }
 
     /**
-     * @param row row
-     * @param col column
-     * @return the text for the specified tile
-     */
-    public String getTextForTile(int row, int col) {
-        return this.board.getTile(row, col).getLabel();
-    }
-
-    /**
      * manipulates game state based on key that was pressed
      * @param key key that was pressed
      */
     public void key(MyKey key) {
-        // find blank tile
-        Dimension blankTilePosition = this.board.getBlankTilePosition();
-        int blankRow = (int) blankTilePosition.getWidth(), blankCol = (int) blankTilePosition.getHeight();
-        if (blankRow == -1 || blankCol == -1) return;
         // switch over key pressed and swap tiles
-        switch (key) {
-            case UP:
-                if (blankRow < this.tilesWide - 1) {
-                    System.out.print(" UP");
-                    this.board.moveTile(blankRow + 1, blankCol);
-                }
-                break;
-            case DOWN:
-                if (blankRow > 0) {
-                    System.out.print(" DOWN");
-                    this.board.moveTile(blankRow - 1, blankCol);
-                }
-                break;
-            case LEFT:
-                if (blankCol < this.tilesWide - 1) {
-                    System.out.print(" LEFT");
-                    this.board.moveTile(blankRow, blankCol + 1);
-                }
-                break;
-            case RIGHT:
-                if (blankCol > 0) {
-                    System.out.print(" RIGHT");
-                    this.board.moveTile(blankRow, blankCol - 1);
-                }
-                break;
-            default:
-                break;
-        }
+        System.out.print(Constants.MOVING_LABEL.get(key));
+        this.board.moveTile(
+            this.board.getBlankTileRow() + Constants.MOVING_ROW_DIFF.get(key),
+            this.board.getBlankTileCol() + Constants.MOVING_COL_DIFF.get(key)
+        );
         this.fireGameUpdateEvent();
     }
 

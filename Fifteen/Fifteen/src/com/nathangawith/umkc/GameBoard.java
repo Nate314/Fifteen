@@ -1,6 +1,5 @@
 package com.nathangawith.umkc;
 
-import java.awt.Dimension;
 import java.util.Arrays;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -9,6 +8,10 @@ public class GameBoard {
 
     private GameTile[][] tiles;
     private int size;
+    private int blankTileRow;
+    private int blankTileCol;
+    public int getBlankTileRow() { return this.blankTileRow; }
+    public int getBlankTileCol() { return this.blankTileCol; }
 
     /**
      * constructor if only the size of the board is known
@@ -53,6 +56,10 @@ public class GameBoard {
         for (int row = 0; row < size; row++) {
             for (int col = 0; col < size; col++) {
                 Integer num = func.apply(counter);
+                if (num == null) {
+                    this.blankTileRow = row;
+                    this.blankTileCol = col;
+                }
                 tiles[row][col] = new GameTile(num);
                 counter++;
             }
@@ -63,12 +70,6 @@ public class GameBoard {
      * prints out console friendly game board
      */
     public void print() {
-        // String str = "";
-        // for (GameTile[] row : this.tiles) {
-        //     str += String.join(" ", Arrays.asList(row).stream().map(tile -> tile.getLabel() == null ? " " : tile.getLabel()).collect(Collectors.toList()));
-        //     str += "\n";
-        // }
-        // System.out.println(str);
         System.out.println(
             String.join("\n",
                 Arrays.asList(this.tiles).stream().map(
@@ -80,25 +81,6 @@ public class GameBoard {
                 ).collect(Collectors.toList())
             ) + "\n"
         );
-    }
-
-    /**
-     * searches all tiles until the blank tile is found
-     * @return the position of the blank tile
-     */
-    public Dimension getBlankTilePosition() {
-        int blankRow = -1, blankCol = -1;
-        for (int row = 0; row < this.size; row++) {
-            for (int col = 0; col < this.size; col++) {
-                if (this.getTile(row, col).getLabel() == null) {
-                    blankRow = row;
-                    blankCol = col;
-                    break;
-                }
-            }
-            if (blankRow != -1 || blankCol != -1) break;
-        }
-        return new Dimension(blankRow, blankCol);
     }
 
     /**
@@ -136,10 +118,13 @@ public class GameBoard {
      * @param col column of the tile to move
      */
     public void moveTile(int row, int col) {
-        Dimension blankTilePosition = this.getBlankTilePosition();
-        int x = (int) blankTilePosition.getWidth(),
-            y = (int) blankTilePosition.getHeight();
-        this.swapTiles(x, y, row, col);
+        boolean validRow = row > -1 && row < Constants.BOARD_SIZE;
+        boolean validCol = col > -1 && col < Constants.BOARD_SIZE;
+        if (validRow && validCol) {
+            this.swapTiles(this.blankTileRow, this.blankTileCol, row, col);
+            this.blankTileRow = row;
+            this.blankTileCol = col;
+        }
     }
 
     /**

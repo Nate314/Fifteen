@@ -1,7 +1,12 @@
 package com.nathangawith.umkc;
 
 import java.awt.Color;
+import java.util.HashMap;
 
+/**
+ * Constants used throughout the application can be modified here.
+ *   Everything here is final except for the COLOR_TEXT object
+ */
 public final class Constants {
     // colors from https://material.io/resources/color/#!/?view.left=0&view.right=0&primary.color=1565C0
     public static final Color MD_PRIMARY_BLUE = new Color(21, 101, 192);
@@ -25,6 +30,9 @@ public final class Constants {
     // other constants
     public static final int MIXING_FREQUENCY = 1000 / 60; // mix at 60fps
     public static final int MIXING_NUMBER = 60 * 3;       // for three seconds
+    public static final HashMap<MyKey, Integer> MOVING_ROW_DIFF = new HashMap<MyKey, Integer>();
+    public static final HashMap<MyKey, Integer> MOVING_COL_DIFF = new HashMap<MyKey, Integer>();
+    public static final HashMap<MyKey, String> MOVING_LABEL = new HashMap<MyKey, String>();
     // AI constants
     public static final String FILE_NAME = "program_1_data.txt";
 }

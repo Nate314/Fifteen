@@ -1,6 +1,8 @@
 package com.nathangawith.umkc;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.BufferedReader;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +15,9 @@ public class AI_IO {
         return this.games;
     }
 
+    /**
+     * parses txt file into an array of GameState objects
+     */
     public AI_IO() {
         // read in games and parse as ArrayList<ArrayList<Integer>>
         ArrayList<ArrayList<Integer>> boards = new ArrayList<ArrayList<Integer>>();

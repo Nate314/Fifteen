@@ -7,16 +7,12 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Rectangle;
 import javax.swing.JPanel;
-import java.lang.Thread;
 
 @SuppressWarnings("serial")
 public class MyPanel extends JPanel implements MyEventInterface {
 
     final GameState game;
     final int boardSize;
-
-    // private int mixingCounter = 0;
-    // private final int mixMax = 3; // mix for 10 seconds at 60 fps
 
     /**
      * Panel used to paint current state of the game
@@ -27,23 +23,17 @@ public class MyPanel extends JPanel implements MyEventInterface {
         this.game = game;
         this.game.setMyEventListener(this);
         this.boardSize = Constants.BOARD_SIZE * Constants.TILE_WIDTH;
-        JPanel me = this;
-        Thread uiReDrawThread = new Thread(
-            new Runnable() {
-                @Override
-                public void run() {
-                    while (true) {
-                        try {
-                            Thread.sleep((int) 1000 / 60); // 60 fps
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        me.repaint();
-                    }
-                }
-            }
-        );
-        uiReDrawThread.start();
+        // JPanel me = this;
+        // Thread uiReDrawThread = new Thread(new Runnable() {
+        //     public void run() {
+        //         while (true) {
+        //             try { Thread.sleep((int) 1000 / 60); }
+        //             catch (Exception e) { e.printStackTrace(); }
+        //             me.repaint();
+        //         }
+        //     }
+        // });
+        // uiReDrawThread.start();
     }
 
     /**
@@ -76,11 +66,10 @@ public class MyPanel extends JPanel implements MyEventInterface {
         this.drawBackground(g);
         for (int row = 0; row < Constants.BOARD_SIZE; row++) {
             for (int col = 0; col < Constants.BOARD_SIZE; col++) {
-                String text = this.game.getTextForTile(row, col);
+                String text = this.game.getGameBoard().getTile(row, col).getLabel();
                 if (text != null) this.drawSquare(g, row, col, text);
             }
         }
-        // this.repaint();
     }
 
     /**
@@ -137,10 +126,12 @@ public class MyPanel extends JPanel implements MyEventInterface {
     }
 
     /**
-     * when the game state changes
+     * when the game state changes,
+     *   calculate the new text color and repaint the panel
      */
     @Override
     public void handle() {
         this.calculateColors();
+        this.repaint();
     }
 }
