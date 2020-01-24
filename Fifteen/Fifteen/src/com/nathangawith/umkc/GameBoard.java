@@ -1,8 +1,7 @@
 package com.nathangawith.umkc;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class GameBoard {
 
@@ -17,8 +16,8 @@ public class GameBoard {
      * constructor if only the size of the board is known
      */
     public GameBoard() {
-        int sizeSquared = Constants.BOARD_SIZE * Constants.BOARD_SIZE;
-        Function<Integer, Integer> func = (c) -> c < sizeSquared - 1 ? c + 1 : null;
+        int square = Constants.BOARD_SIZE * Constants.BOARD_SIZE;
+        Function<Integer, Integer> func = (c) -> c < square - 1 ? c + 1 : 0;
         this.constructor(func);
     }
 
@@ -26,8 +25,17 @@ public class GameBoard {
      * constructor if the size of the board and all of the labels are known
      * @param tileLabels array of Integers representing each tile on the board
      */
-    public GameBoard(Integer[] tileLabels) {
-        Function<Integer, Integer> func = (c) -> tileLabels[c] != null ? tileLabels[c] : null;
+    public GameBoard(int[] tileLabels) {
+        Function<Integer, Integer> func = (c) -> tileLabels[c];
+        this.constructor(func);
+    }
+
+    /**
+     * constructor if the size of the board and all of the labels are known
+     * @param tileLabels array of Integers representing each tile on the board
+     */
+    public GameBoard(List<Integer> tileLabels) {
+        Function<Integer, Integer> func = (c) -> tileLabels.get(c);
         this.constructor(func);
     }
 
@@ -36,11 +44,12 @@ public class GameBoard {
      * @param board board to copy
      */
     public GameBoard(GameBoard board) {
+        int square = Constants.BOARD_SIZE * Constants.BOARD_SIZE;
         Function<Integer, Integer> func = (c) -> {
             int row = c / board.size;
             int col = c % board.size;
-            String str = board.getTile(row, col).getLabel();
-            return str == null ? null : Integer.parseInt(board.getTile(row, col).getLabel());
+            int num = board.getTile(row, col).getValue();
+            return num == square ? 0 : num;
         };
         this.constructor(func);
     }
@@ -56,7 +65,7 @@ public class GameBoard {
         for (int row = 0; row < size; row++) {
             for (int col = 0; col < size; col++) {
                 Integer num = func.apply(counter);
-                if (num == null) {
+                if (num == 0) {
                     this.blankTileRow = row;
                     this.blankTileCol = col;
                 }
@@ -70,17 +79,29 @@ public class GameBoard {
      * prints out console friendly game board
      */
     public void print() {
-        System.out.println(
-            String.join("\n",
-                Arrays.asList(this.tiles).stream().map(
-                    row -> String.join(" ",
-                        Arrays.asList(row).stream().map(
-                            tile -> tile.getLabel() == null ? " " : tile.getLabel()
-                        ).collect(Collectors.toList())
-                    )
-                ).collect(Collectors.toList())
-            ) + "\n"
-        );
+        for (int row = 0; row < Constants.BOARD_SIZE; row++) {
+            for (int col = 0; col < Constants.BOARD_SIZE; col++) {
+                String label = this.tiles[row][col].getLabel();
+                System.out.print((label == null ? " " : label) + " ");
+            }
+            System.out.println();
+        }
+        System.out.println();
+    }
+
+    /**
+     * @return a compresed stringy version of the board
+     */
+    public String stringify() {
+        String result = "";
+        for (int row = 0; row < Constants.BOARD_SIZE; row++) {
+            for (int col = 0; col < Constants.BOARD_SIZE; col++) {
+                String label = this.tiles[row][col].getLabel();
+                result += (label == null ? "0" : label);
+                if (row != Constants.BOARD_SIZE - 1 || col != Constants.BOARD_SIZE - 1) result += ",";
+            }
+        }
+        return result;
     }
 
     /**
@@ -106,10 +127,11 @@ public class GameBoard {
      * @param row2 row of the second tile to swap
      * @param col2 column of the second tile to swap
      */
-    private void swapTiles(int row1, int col1, int row2, int col2) {
+    private String swapTiles(int row1, int col1, int row2, int col2) {
         GameTile temp = this.tiles[row1][col1];
         this.tiles[row1][col1] = this.tiles[row2][col2];
         this.tiles[row2][col2] = temp;
+        return this.tiles[row1][col1].getLabel();
     }
 
     /**
@@ -117,44 +139,16 @@ public class GameBoard {
      * @param row row of the tile to move
      * @param col column of the tile to move
      */
-    public void moveTile(int row, int col) {
+    public String moveTile(int row, int col) {
+        String result = null;
         boolean validRow = row > -1 && row < Constants.BOARD_SIZE;
         boolean validCol = col > -1 && col < Constants.BOARD_SIZE;
         if (validRow && validCol) {
-            this.swapTiles(this.blankTileRow, this.blankTileCol, row, col);
+            result = this.swapTiles(this.blankTileRow, this.blankTileCol, row, col);
             this.blankTileRow = row;
             this.blankTileCol = col;
         }
-    }
-
-    /**
-     * returns -1, 0, or 1 based on how int1 and int2 compare
-     * @param int1 left integer to compare
-     * @param int2 right integer to compare
-     * @return -1 if left < right, 1 if left > right, 0 if left == right
-     */
-    private int compareInteger(int int1, int int2) {
-        return int1 < int2 ? -1 : (int1 > int2 ? 1 : 0);
-    }
-
-    /**
-     * returns -1, 0, or 1 based on how str1 and str2 compare
-     * @param str1 left string to compare
-     * @param str2 right string to compare
-     * @return -1 if left < right, 1 if left > right, 0 if left == right
-     */
-    private int compareString(String str1, String str2) {
-        if (Arrays.asList(Arrays.asList(str1.split("")).stream().map((character) -> {
-            return Arrays.asList("-0123456789".split("")).contains(character);
-        }).toArray()).contains(false)
-        || Arrays.asList(Arrays.asList(str1.split("")).stream().map((character) -> {
-            return Arrays.asList("-0123456789".split("")).contains(character);
-        }).toArray()).contains(false)) {
-            // TODO compare string function
-            return 0;
-        } else {
-            return this.compareInteger(Integer.parseInt(str1), Integer.parseInt(str2));
-        }
+        return result;
     }
 
     /**
@@ -162,15 +156,12 @@ public class GameBoard {
      */
     public boolean isFinished() {
         boolean result = true;
-        String lastLabel = "-1";
+        int lastValue = -1;
         for (int row = 0; row < this.tiles.length; row++) {
             for (int col = 0; col < this.tiles[row].length; col++) {
-                String label = this.tiles[row][col].getLabel();
-                label = label == null ? "" + this.size * this.size : label;
-                if (this.compareString(lastLabel, label) != -1) {
-                    result = false;
-                }
-                lastLabel = label;
+                int value = this.tiles[row][col].getValue();
+                if (value < lastValue) result = false;
+                lastValue = value;
             }
         }
         return result;

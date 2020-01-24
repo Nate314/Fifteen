@@ -26,17 +26,32 @@ public class GameState {
      *                      game state will be the correct finished game state.
      * @param mixItUp if true, then the board will be mixed prior to gameplay
      */
-    public GameState(Integer[] tileLabels, boolean mixItUp) {
-        this.board = tileLabels != null
-            ? new GameBoard(tileLabels) : new GameBoard();
+    public GameState(int[] tileNums, boolean mixItUp) {
+        this.board = tileNums != null
+            ? new GameBoard(tileNums) : new GameBoard();
         if (mixItUp) this.mix();
+    }
+
+    /**
+     * copy constructor
+     * @param game game to copy
+     */
+    public GameState(GameState game) {
+        this.board = game.getGameBoard();
+    }
+
+    /**
+     * constructor used if the board has already been created
+     * @param board board to use for this GameState
+     */
+    public GameState(GameBoard board) {
+        this.board = board;
     }
 
     /**
      * mixes board by randomly firing key events
      */
     private void mix() {
-        MyKey[] keys = new MyKey[] {MyKey.UP, MyKey.DOWN, MyKey.LEFT, MyKey.RIGHT};
         Random random = new Random();
         this.fireGameUpdateEvent();
         GameState me = this;
@@ -48,8 +63,8 @@ public class GameState {
                         Thread.sleep(1500);
                         me.isMixing = true;
                         for (int i = 0; i < Constants.MIXING_NUMBER; i++) {
-                            int index = random.nextInt(4);
-                            me.key(keys[index]);
+                            int index = random.nextInt(Constants.KEYS.length);
+                            me.key(Constants.KEYS[index]);
                             Thread.sleep(Constants.MIXING_FREQUENCY);
                         }
                     } catch (Exception ex) { }
@@ -66,12 +81,14 @@ public class GameState {
      * @param key key that was pressed
      */
     public void key(MyKey key) {
-        // switch over key pressed and swap tiles
-        System.out.print(Constants.MOVING_LABEL.get(key));
-        this.board.moveTile(
-            this.board.getBlankTileRow() + Constants.MOVING_ROW_DIFF.get(key),
-            this.board.getBlankTileCol() + Constants.MOVING_COL_DIFF.get(key)
-        );
+        // swap tiles for associated with the pressed key
+        // System.out.print(Constants.MOVING_LABEL.get(key));
+        // System.out.print(" " +
+            this.board.moveTile(
+                this.board.getBlankTileRow() + Constants.MOVING_ROW_DIFF.get(key),
+                this.board.getBlankTileCol() + Constants.MOVING_COL_DIFF.get(key)
+            );
+        // );
         this.fireGameUpdateEvent();
     }
 

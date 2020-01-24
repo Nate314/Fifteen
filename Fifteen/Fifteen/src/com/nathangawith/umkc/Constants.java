@@ -33,6 +33,7 @@ public final class Constants {
     public static final HashMap<MyKey, Integer> MOVING_ROW_DIFF = new HashMap<MyKey, Integer>();
     public static final HashMap<MyKey, Integer> MOVING_COL_DIFF = new HashMap<MyKey, Integer>();
     public static final HashMap<MyKey, String> MOVING_LABEL = new HashMap<MyKey, String>();
+    public static final MyKey[] KEYS = new MyKey[] { MyKey.UP, MyKey.DOWN, MyKey.LEFT, MyKey.RIGHT };
     // AI constants
-    public static final String FILE_NAME = "program_1_data.txt";
+    public static final String FILE_NAME = "program_1_data copy.txt";
 }

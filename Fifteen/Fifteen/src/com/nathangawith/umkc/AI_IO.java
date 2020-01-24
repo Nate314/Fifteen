@@ -15,10 +15,28 @@ public class AI_IO {
         return this.games;
     }
 
+    private void debug() {
+        String[] pathnames;
+
+        // Creates a new File instance by converting the given pathname string
+        // into an abstract pathname
+        File f = new File(".");
+
+        // Populates the array with names of files and directories
+        pathnames = f.list();
+
+        // For each pathname in the pathnames array
+        for (String pathname : pathnames) {
+            // Print the names of files and directories
+            System.out.println(pathname);
+        }
+    }
+
     /**
      * parses txt file into an array of GameState objects
      */
     public AI_IO() {
+        this.debug();
         // read in games and parse as ArrayList<ArrayList<Integer>>
         ArrayList<ArrayList<Integer>> boards = new ArrayList<ArrayList<Integer>>();
         boards.add(new ArrayList<Integer>());
@@ -26,10 +44,9 @@ public class AI_IO {
             List<String> numbers = Arrays.asList(line.split(" "));
             if (numbers.size() == Constants.BOARD_SIZE) {
                 boards.get(boards.size() - 1).addAll(
-                    numbers.parallelStream().map(x -> {
-                        int num = Integer.parseInt(x);
-                        return num == 0 ? null : num;
-                    }).collect(Collectors.toList()));
+                    numbers.parallelStream().map(x ->
+                        Integer.parseInt(x)
+                    ).collect(Collectors.toList()));
             } else {
                 boards.add(new ArrayList<Integer>());
             }
@@ -38,7 +55,7 @@ public class AI_IO {
         int i = 0;
         games = new GameState[boards.size()];
         for (ArrayList<Integer> numbers : boards) {
-            Integer[] arr = this.toArray(numbers);
+            int[] arr = this.toArray(numbers);
             games[i++] = new GameState(arr, false);
         }
     }
@@ -48,8 +65,8 @@ public class AI_IO {
      * @param arrayList ArrayList to convert
      * @return Integer[]
      */
-    private Integer[] toArray(ArrayList<Integer> arrayList) {
-        Integer[] array = new Integer[arrayList.size()];
+    private int[] toArray(ArrayList<Integer> arrayList) {
+        int[] array = new int[arrayList.size()];
         for (int i = 0; i < arrayList.size(); i++)
             array[i] = arrayList.get(i);
         return array;
