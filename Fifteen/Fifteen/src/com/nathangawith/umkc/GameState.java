@@ -63,8 +63,8 @@ public class GameState {
                         Thread.sleep(1500);
                         me.isMixing = true;
                         for (int i = 0; i < Constants.MIXING_NUMBER; i++) {
-                            int index = random.nextInt(Constants.KEYS.length);
-                            me.key(Constants.KEYS[index]);
+                            int index = random.nextInt(Constants.KEYS.size());
+                            me.key(Constants.KEYS.get(index));
                             Thread.sleep(Constants.MIXING_FREQUENCY);
                         }
                     } catch (Exception ex) { }
