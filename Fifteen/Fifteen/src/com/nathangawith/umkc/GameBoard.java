@@ -1,8 +1,10 @@
 package com.nathangawith.umkc;
+import java.util.Arrays;
 //#region imports
 import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 //#endregion
 public class GameBoard {
     //#region private fields
@@ -33,6 +35,14 @@ public class GameBoard {
     public GameBoard(boolean mixItUp) {
         this((c) -> c < Constants.SQUARE_BOARD_SIZE - 1 ? c + 1 : 0);
         if (mixItUp) this.mix();
+    }
+
+    /**
+     * constructor if the size of the board and all of the labels are known
+     * @param tileLabels array of Strings representing each tile on the board
+     */
+    public GameBoard(String[] tileLabels) {
+        this(Arrays.asList(tileLabels).stream().map(x -> Integer.parseInt(x)).collect(Collectors.toList()));
     }
 
     /**

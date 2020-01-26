@@ -6,10 +6,17 @@ public class Fifteen {
      * @param args
      */
     public static void main(String[] args) {
+        Fifteen.main();
+    }
+
+    /**
+     * main method
+     */
+    private static void main() {
         Fifteen.setupConstants();
-        // new MyFrame(new GameBoard(true));
+        // new MyFrame(new GameBoard());
         long start = System.currentTimeMillis();
-        new AI(false);
+        new AI(true);
         long end = System.currentTimeMillis();
         System.out.println(String.format("Total running time: %dms", end - start));
     }

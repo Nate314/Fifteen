@@ -14,13 +14,11 @@ import java.util.stream.Collectors;
 public class AI_IO {
     //#region fields
     private GameBoard[] gameBoards;
-    public GameBoard[] getGameBoards() {
-        return this.gameBoards;
-    }
+    public GameBoard[] getGameBoards() { return this.gameBoards; }
     //#endregion
     //#region constructor
     /**
-     * parses txt file into an array of GameState objects
+     * parses txt file into an array of GameBoard objects
      */
     public AI_IO() {
         // read in games and parse as ArrayList<ArrayList<Integer>>

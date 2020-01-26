@@ -2,93 +2,86 @@ package com.nathangawith.umkc;
 //#region imports
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Random;
 //#endregion
 public class AI_Solver {
     //#region fields
-    public ArrayList<MyKey> solution;
+    public final GameHistory history;
+    public ArrayList<String> badStates = new ArrayList<String>();
     //#endregion
     //#region constructor
     /**
      * generates solution as a list of key presses
      * @param gameBoard GameBoard to solve
-     * @return an ArrayList of MyKey that designates the order of tile swaps to solve the game
      */
     public AI_Solver(GameBoard gameBoard) {
-        ArrayList<String> gameStates = new ArrayList<String>();
-        ArrayList<MyKey> moves = new ArrayList<MyKey>();
-        System.out.println(gameBoard.distanceToFinish());
-        while (!gameBoard.isFinished()) {
-            HashMap<MyKey, Integer> options = new HashMap<MyKey, Integer>();
-            Constants.KEYS.parallelStream().forEach(key -> {
-                GameBoard tempGame = new GameBoard(gameBoard);
-                tempGame.key(key);
-                options.put(key, tempGame.distanceToFinish());
-            });
-            MyKey minKey = this.getMinKey(options, gameBoard, gameStates);
-            gameStates.add(gameBoard.stringify());
-            moves.add(minKey);
-            gameBoard.key(minKey);
-        }
-        this.solution = moves;
+        this.history = new GameHistory(gameBoard.stringify());
+        while (!gameBoard.isFinished()) gameBoard = this.nextStep(gameBoard);
     }
     //#endregion
     //#region private methods
     /**
-     * @param gameBoard game to check when picking a random key
-     * @return a random MyKey that will change the GameState passed
+     * @param GameBoard current GameBoard
+     * @return the next GameBoard state
      */
-    private MyKey pickRandomKey(GameBoard gameBoard) {
-        MyKey randomKey = null;
-        String stringifiedBoard = gameBoard.stringify();
-        String nextBoard = stringifiedBoard;
-        while (nextBoard.equals(stringifiedBoard)) {
-            randomKey = Constants.KEYS.get(new Random().nextInt(Constants.KEYS.size()));
-            GameBoard tempGame = new GameBoard(gameBoard);
-            tempGame.key(randomKey);
-            nextBoard = tempGame.stringify();
+    private GameBoard nextStep(GameBoard gameBoard) {
+        MyKey[] minKeys = this.orderedKeys(gameBoard);
+        for (MyKey minKey : minKeys) {
+            GameBoard temp = new GameBoard(gameBoard);
+            temp.key(minKey);
+            String stringifiedBoard = temp.stringify();
+            if (this.history.stringifiedBoards.contains(stringifiedBoard)
+                || this.badStates.contains(stringifiedBoard)) {
+                    continue;
+            } else {
+                this.history.add(temp.stringify(), minKey, temp.distanceToFinish());
+                return temp;
+            }
         }
-        return randomKey;
+        this.badStates.add(this.history.pop());
+        return this.nextStep(new GameBoard(this.history.stringifiedBoards.get(this.history.stringifiedBoards.size() - 1).split(",")));
     }
 
     /**
-     * returns the key that will minimize the score and not result in a previous
-     * gameboard that has already been seen. If all options result in a previous
-     * gameboard, then a random key is returned.
-     * @param options a map between keys and the scores of the resulting GameBoards
-     * @param gameBoard current GameBoard
-     * @param gameStates previous stringified boards
-     * @return the key that will minimize the score
+     * wrapper function for
+     * <code>MyKey[] orderedKeys(HashMap<MyKey, Integer> options, MyKey[] result, int index)</code>
+     * @param gameBoard the current gameBoard
+     * @return an ordered list of keys based on score
      */
-    private MyKey getMinKey(HashMap<MyKey, Integer> options, GameBoard gameBoard, ArrayList<String> gameStates) {
-        // if there are options available
-        if (options.keySet().size() > 0) {
-            int min = Integer.MAX_VALUE;
-            MyKey minKey = null;
-            // find key press associated with the minimum score
-            for (MyKey key : options.keySet()) {
-                int val = options.get(key);
-                if (val < min) {
-                    min = val;
-                    minKey = key;
-                }
+    private MyKey[] orderedKeys(GameBoard gameBoard) {
+        return orderedKeys(new HashMap<MyKey, Integer>() {
+            private static final long serialVersionUID = 1L;
+            public HashMap<MyKey, Integer> init() {
+                Constants.KEYS.stream().forEach(key -> {
+                    GameBoard tempGame = new GameBoard(gameBoard);
+                    tempGame.key(key);
+                    this.put(key, tempGame.distanceToFinish());
+                });
+                return this;
             }
-            if (minKey != null) {
-                GameBoard temp = new GameBoard(gameBoard);
-                temp.key(minKey);
-                // if the state has not been visited
-                if (!gameStates.contains(temp.stringify())) {
-                    return minKey;
-                // otherwise recursively call without the calculated min key
-                } else {
-                    options.remove(minKey);
-                    return this.getMinKey(options, gameBoard, gameStates);
-                }
+        }.init(), new MyKey[Constants.KEYS.size()], 0);
+    }
+
+    /**
+     * @param options a map between keys and the scores of the resulting GameBoards
+     * @param result result that is built recursively
+     * @param index index used to index result recursively
+     * @return an ordered list of keys based on score
+     */
+    private MyKey[] orderedKeys(HashMap<MyKey, Integer> options, MyKey[] result, int index) {
+        int min = Integer.MAX_VALUE;
+        MyKey minKey = null;
+        // find key press associated with the minimum score
+        for (MyKey key : options.keySet()) {
+            int val = options.get(key);
+            if (val < min) {
+                min = val;
+                minKey = key;
             }
         }
-        // if the minimum key leads to a state that
-        // has already been visited then pick a random key
-        return this.pickRandomKey(gameBoard);
+        result[index++] = minKey;
+        options.remove(minKey);
+        if (index == Constants.KEYS.size()) return result;
+        else return this.orderedKeys(options, result, index);
     }
     //#endregion
 }

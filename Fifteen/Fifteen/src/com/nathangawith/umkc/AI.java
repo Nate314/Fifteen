@@ -22,8 +22,17 @@ public class AI {
             if (solvable) {
                 // if the game is solvable generate solution
                 AI_Solver solver = new AI_Solver(new GameBoard(gameBoard));
-                ArrayList<MyKey> moves = solver.solution;
-                moves.forEach(move -> System.out.print(move + ", "));
+                ArrayList<MyKey> moves = solver.history.keyList;
+                // ArrayList<String> states = solver.history.stringifiedBoards;
+                // moves.forEach(move -> System.out.print(move + ", "));
+                // System.out.println();
+                // states.forEach(state -> System.out.print(state + "|"));
+                System.out.println("Tiles:");
+                solver.history.swappedTiles.forEach(tile -> System.out.print(tile + "|"));
+                System.out.println();
+                System.out.println("Distances:");
+                solver.history.distances.forEach(dist -> System.out.print(dist + "|"));
+                System.out.println();
                 System.out.println("Total of " + moves.size() + " moves");
                 // display solution with GUI
                 if (enableGUI) {
