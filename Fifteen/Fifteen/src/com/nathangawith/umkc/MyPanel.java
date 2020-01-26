@@ -1,5 +1,6 @@
 package com.nathangawith.umkc;
-
+//#region imports
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -7,55 +8,25 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Rectangle;
 import javax.swing.JPanel;
-
+//#endregion
 @SuppressWarnings("serial")
 public class MyPanel extends JPanel implements MyEventInterface {
-
-    final GameState game;
-    final int boardSize;
-
+    //#region fields
+    private final GameBoard gameBoard;
+    private Color textColor = Constants.MD_WHITE;
+    //#endregion
+    //#region constructor
     /**
      * Panel used to paint current state of the game
-     * @param game GameState object
+     * @param gameBoard GameBoard object
      */
-    public MyPanel(GameState game) {
+    public MyPanel(GameBoard gameBoard) {
         super();
-        this.game = game;
-        this.game.setMyEventListener(this);
-        this.boardSize = Constants.BOARD_SIZE * Constants.TILE_WIDTH;
-        // JPanel me = this;
-        // Thread uiReDrawThread = new Thread(new Runnable() {
-        //     public void run() {
-        //         while (true) {
-        //             try { Thread.sleep((int) 1000 / 60); }
-        //             catch (Exception e) { e.printStackTrace(); }
-        //             me.repaint();
-        //         }
-        //     }
-        // });
-        // uiReDrawThread.start();
+        this.gameBoard = gameBoard;
+        this.gameBoard.setMyEventListener(this);
     }
-
-    /**
-     * sets the text color to the appropriate game state color
-     */
-    public void calculateColors() {
-        Constants.COLOR_TEXT = this.game.getIsMixing() ? Constants.COLOR_MIXING
-            : this.game.getGameBoard().isFinished() ? Constants.COLOR_ALL_CORRECT : Constants.MD_WHITE;
-    }
-
-    /**
-     * Calculates position of tile[i][j]
-     * @param row rowof the tile to paint
-     * @param col column of the tile to paint
-     * @return returns x and y position of the specified tile
-     */
-    public Dimension getPosition(int row, int col) {
-        int x = (col * Constants.TILE_WIDTH) + Constants.GUTTER_SIZE;
-        int y = (row * Constants.TILE_WIDTH) + Constants.GUTTER_SIZE;
-        return new Dimension(x, y);
-    }
-
+    //#endregion
+    //#region painting methods
     /**
      * This is where the drawing happens
      * @param g Graphics object used to draw
@@ -63,10 +34,12 @@ public class MyPanel extends JPanel implements MyEventInterface {
     @Override
     public void paint(Graphics g) {
         super.paint(g);
+        this.textColor = this.gameBoard.getIsMixing() ? Constants.COLOR_MIXING
+            : (this.gameBoard.isFinished() ? Constants.COLOR_ALL_CORRECT : Constants.MD_WHITE);
         this.drawBackground(g);
         for (int row = 0; row < Constants.BOARD_SIZE; row++) {
             for (int col = 0; col < Constants.BOARD_SIZE; col++) {
-                String text = this.game.getGameBoard().getTile(row, col).getLabel();
+                String text = this.gameBoard.getTile(row, col).getLabel();
                 if (text != null) this.drawSquare(g, row, col, text);
             }
         }
@@ -78,7 +51,7 @@ public class MyPanel extends JPanel implements MyEventInterface {
      */
     private void drawBackground(Graphics g) {
         g.setColor(Constants.COLOR_BACKGROUND);
-        g.fillRect(0, 0, boardSize, boardSize);
+        g.fillRect(0, 0, Constants.PX_BOARD_SIZE, Constants.PX_BOARD_SIZE);
     }
 
     /**
@@ -98,7 +71,7 @@ public class MyPanel extends JPanel implements MyEventInterface {
             h = Constants.TILE_WIDTH - (2 * Constants.GUTTER_SIZE);
         g.fillRect(x, y, w, h);
         // draw text
-        g.setColor(Constants.COLOR_TEXT);
+        g.setColor(this.textColor);
         Font font = new Font("Consolas", Font.BOLD, (int) (Constants.TILE_WIDTH * 0.55));
         this.drawCenteredText(g, font, text, new Rectangle(x, y, w, h));
     }
@@ -124,6 +97,19 @@ public class MyPanel extends JPanel implements MyEventInterface {
             ((rectangleHeight - fm.getHeight()) / 2) + fm.getAscent() + rectangleY);
         g2d.dispose();
     }
+    //#endregion
+    //#region other methods
+    /**
+     * Calculates position of tile[i][j]
+     * @param row rowof the tile to paint
+     * @param col column of the tile to paint
+     * @return returns x and y position of the specified tile
+     */
+    public Dimension getPosition(int row, int col) {
+        int x = (col * Constants.TILE_WIDTH) + Constants.GUTTER_SIZE;
+        int y = (row * Constants.TILE_WIDTH) + Constants.GUTTER_SIZE;
+        return new Dimension(x, y);
+    }
 
     /**
      * when the game state changes,
@@ -131,7 +117,7 @@ public class MyPanel extends JPanel implements MyEventInterface {
      */
     @Override
     public void handle() {
-        this.calculateColors();
         this.repaint();
     }
+    //#endregion
 }

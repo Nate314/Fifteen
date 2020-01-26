@@ -1,5 +1,5 @@
 package com.nathangawith.umkc;
-
+//#region imports
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -10,14 +10,15 @@ import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
+//#endregion
 public class AI_IO {
-
-    private GameState[] games;
-    public GameState[] getGames() {
-        return this.games;
+    //#region fields
+    private GameBoard[] gameBoards;
+    public GameBoard[] getGameBoards() {
+        return this.gameBoards;
     }
-
+    //#endregion
+    //#region constructor
     /**
      * parses txt file into an array of GameState objects
      */
@@ -26,53 +27,49 @@ public class AI_IO {
         ArrayList<ArrayList<Integer>> boards = new ArrayList<ArrayList<Integer>>();
         boards.add(new ArrayList<Integer>());
         try {
-            for (String line : this.readFile(Constants.FILE_NAME).split("\n")) {
+            // for each line in the file
+            for (String line : this.readFileLines(Constants.FILE_NAME)) {
+                // if the correct number of numbers are on the current line
+                //   add the numbers to the current ArrayList
                 List<String> numbers = Arrays.asList(line.split(" "));
                 if (numbers.size() == Constants.BOARD_SIZE) {
                     boards.get(boards.size() - 1).addAll(
                         numbers.parallelStream().map(x ->
                             Integer.parseInt(x)
                         ).collect(Collectors.toList()));
+                // otherwise, add a new empty ArrayList
                 } else {
                     boards.add(new ArrayList<Integer>());
                 }
             }
-            // populate games
-            int i = 0;
-            games = new GameState[boards.size()];
-            for (ArrayList<Integer> numbers : boards) {
-                int[] arr = this.toArray(numbers);
-                games[i++] = new GameState(arr, false);
+            // create GameBoard objects
+            this.gameBoards = new GameBoard[boards.size()];
+            for (int i = 0; i < boards.size(); i++) {
+                int[] arr = this.toArray(boards.get(i));
+                this.gameBoards[i] = new GameBoard(arr);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
+    //#endregion
+    //#region java io
     /**
      * retrieves written parities from file
      */
     public HashSet<String> getParities() {
-        System.out.println("Retrieving . . .");
         HashSet<String> result = new HashSet<String>();
-        ArrayList<String> lines = new ArrayList<String>();
         System.out.println();
-        for (int i = 1; i < 100; i++) {
-            System.out.print("\rReading . . . " + i);
+        // read all files in the form `${Constants.OUTPUT_PARITY_FILE_NAME - '.txt'}${counter}.txt`
+        int fileCounter = 1;
+        while (true) {
+            String filename = Constants.OUTPUT_PARITY_FILE_NAME.split(".txt")[0] + fileCounter + ".txt";
+            System.out.print("\rReading . . . " + filename);
             try {
-                String filename = Constants.OUTPUT_PARITY_FILE_NAME.split(".txt")[0] + i + ".txt";
-                for (String line : this.readFile(filename).split("\n")) {
-                    lines.add(line);
-                }
-            } catch (Exception ex) {
-                break;
-            }
-        }
-        int i = 0;
-        System.out.println();
-        for (String str : lines) {
-            System.out.print("\rAdding . . . " + (++i));
-            result.add(str);
+                // add each line from files to result
+                for (String line : this.readFileLines(filename)) result.add(line);
+            } catch (Exception ex) { break; }
+            fileCounter++;
         }
         System.out.println();
         return result;
@@ -82,12 +79,14 @@ public class AI_IO {
      * writes passed string to a file
      */
     public void outputParities(String output) {
-        int i = 0;
         String out = "";
-        for (String line : output.split("\n")) {
-            out += line + "\n";
-            if (++i % 10000 == 0) {
+        String[] lines = output.split("\n");
+        for (int i = 1; i < lines.length; i++) {
+            out += lines[i] + "\n";
+            // output to disk every 10000 lines
+            if (i % 10000 == 0) {
                 String filename = Constants.OUTPUT_PARITY_FILE_NAME.split(".txt")[0] + (i / 10000) + ".txt";
+                System.out.print("\rWriting . . . " + filename);
                 this.writeFile(filename, out);
                 out = "";
             }
@@ -105,21 +104,22 @@ public class AI_IO {
             array[i] = arrayList.get(i);
         return array;
     }
-
+    //#endregion
+    //#region file io
     /**
      * reads file
      * code from https://www.geeksforgeeks.org/different-ways-reading-text-file-java/
      * @param filename file to read
-     * @return file as string
+     * @return array of lines from the file
      */
-    private String readFile(String filename) throws Exception {
+    private String[] readFileLines(String filename) throws Exception {
         String result = "";
         File file = new File(filename);
         BufferedReader br = new BufferedReader(new FileReader(file)); 
         String st;
         while ((st = br.readLine()) != null) result += st + '\n';
         br.close();
-        return result;
+        return result.split("\n");
     }
 
     /**
@@ -143,4 +143,5 @@ public class AI_IO {
             e.printStackTrace();
         }
     }
+    //#endregion
 }

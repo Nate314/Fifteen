@@ -1,12 +1,13 @@
 package com.nathangawith.umkc;
 
 public class GameTile {
-
+    //#region fields
     private int value;
     public String getLabel() { return this.value == 0 ? null : this.value + ""; }
     public int getValue() { return this.value != 0 ? this.value
-        : Constants.BOARD_SIZE * Constants.BOARD_SIZE; }
-
+        : Constants.SQUARE_BOARD_SIZE; }
+    //#endregion
+    //#region constructor
     /**
      * GameTile constructor
      * @param label label to save for this tile
@@ -14,7 +15,8 @@ public class GameTile {
     public GameTile(int value) {
         this.value = value;
     }
-
+    //#endregion
+    //#region public methods
     /**
      * @param row row to calculate the distance from
      * @param col column to calculate the distance from
@@ -27,4 +29,5 @@ public class GameTile {
         int verticalDistance = Math.abs(col - goalCol);
         return (horizontalDistance + verticalDistance);
     }
+    //#endregion
 }

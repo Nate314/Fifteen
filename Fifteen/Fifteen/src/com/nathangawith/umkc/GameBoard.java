@@ -1,24 +1,38 @@
 package com.nathangawith.umkc;
-
+//#region imports
 import java.util.List;
+import java.util.Random;
 import java.util.function.Function;
-
+//#endregion
 public class GameBoard {
-
+    //#region private fields
+    private boolean isMixing = false;
+    private void fireGameUpdateEvent() { if (this.gameUpdateInterface != null) { this.gameUpdateInterface.handle(); } }
     private GameTile[][] tiles;
     private int size;
     private int blankTileRow;
     private int blankTileCol;
+    //#endregion
+    //#region public fields
+    public boolean getIsMixing() { return this.isMixing; }
+    // event listener for whoever wants to subscribe to game events
+    // code from https://stackoverflow.com/questions/33948916/java-custom-event-handler-and-listeners/33950694
+    private MyEventInterface gameUpdateInterface;
+    public void setMyEventListener(MyEventInterface listener) { this.gameUpdateInterface = listener; }
     public int getBlankTileRow() { return this.blankTileRow; }
     public int getBlankTileCol() { return this.blankTileCol; }
-
+    //#endregion
+    //#region constructors
     /**
      * constructor if only the size of the board is known
      */
     public GameBoard() {
-        int square = Constants.BOARD_SIZE * Constants.BOARD_SIZE;
-        Function<Integer, Integer> func = (c) -> c < square - 1 ? c + 1 : 0;
-        this.constructor(func);
+        this((c) -> c < Constants.SQUARE_BOARD_SIZE - 1 ? c + 1 : 0);
+    }
+
+    public GameBoard(boolean mixItUp) {
+        this((c) -> c < Constants.SQUARE_BOARD_SIZE - 1 ? c + 1 : 0);
+        if (mixItUp) this.mix();
     }
 
     /**
@@ -26,8 +40,7 @@ public class GameBoard {
      * @param tileLabels array of Integers representing each tile on the board
      */
     public GameBoard(int[] tileLabels) {
-        Function<Integer, Integer> func = (c) -> tileLabels[c];
-        this.constructor(func);
+        this((c) -> tileLabels[c]);
     }
 
     /**
@@ -35,8 +48,7 @@ public class GameBoard {
      * @param tileLabels array of Integers representing each tile on the board
      */
     public GameBoard(List<Integer> tileLabels) {
-        Function<Integer, Integer> func = (c) -> tileLabels.get(c);
-        this.constructor(func);
+        this((c) -> tileLabels.get(c));
     }
 
     /**
@@ -44,21 +56,19 @@ public class GameBoard {
      * @param board board to copy
      */
     public GameBoard(GameBoard board) {
-        int square = Constants.BOARD_SIZE * Constants.BOARD_SIZE;
-        Function<Integer, Integer> func = (c) -> {
+        this((c) -> {
             int row = c / board.size;
             int col = c % board.size;
             int num = board.getTile(row, col).getValue();
-            return num == square ? 0 : num;
-        };
-        this.constructor(func);
+            return num == Constants.SQUARE_BOARD_SIZE ? 0 : num;
+        });
     }
 
     /**
      * generic constructor used by both of the above constructors
      * @param func function used to get the ith tile
      */
-    private void constructor(Function<Integer, Integer> func) {
+    public GameBoard(Function<Integer, Integer> func) {
         this.size = Constants.BOARD_SIZE;
         int counter = 0;
         tiles = new GameTile[size][size];
@@ -74,7 +84,68 @@ public class GameBoard {
             }
         }
     }
+    //#endregion
+    //#region game state modifiers
+    /**
+     * mixes board by randomly firing key events
+     */
+    private void mix() {
+        Random random = new Random();
+        this.fireGameUpdateEvent();
+        GameBoard me = this;
+        Thread mixingThread = new Thread(
+            new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(1500);
+                        me.isMixing = true;
+                        for (int i = 0; i < Constants.MIXING_NUMBER; i++) {
+                            int index = random.nextInt(Constants.KEYS.size());
+                            me.key(Constants.KEYS.get(index));
+                            Thread.sleep(Constants.MIXING_FREQUENCY);
+                        }
+                    } catch (Exception ex) { }
+                    me.isMixing = false;
+                    me.fireGameUpdateEvent();
+                }
+            }
+        );
+        mixingThread.start();
+    }
 
+    /**
+     * @return the total distance of all of the tiles to their finished state
+     */
+    public int distanceToFinish() {
+        int result = 0;
+        for (int row = 0; row < Constants.BOARD_SIZE; row++) {
+            for (int col = 0; col < Constants.BOARD_SIZE; col++) {
+                GameTile tile = this.getTile(row, col);
+                int distance = tile.distanceToGoal(row, col);
+                result += distance;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * @return true if the board is in a finished state
+     */
+    public boolean isFinished() {
+        boolean result = true;
+        int lastValue = -1;
+        for (int row = 0; row < this.tiles.length; row++) {
+            for (int col = 0; col < this.tiles[row].length; col++) {
+                int value = this.tiles[row][col].getValue();
+                if (value < lastValue) result = false;
+                lastValue = value;
+            }
+        }
+        return result;
+    }
+    //#endregion
+    //#region stringification
     /**
      * prints out console friendly game board
      */
@@ -103,7 +174,8 @@ public class GameBoard {
         }
         return result;
     }
-
+    //#endregion
+    //#region tile retrieval and modification functions
     /**
      * returns the tile for the specified row and column
      * @param row row to retrieve the tile from
@@ -152,19 +224,19 @@ public class GameBoard {
     }
 
     /**
-     * @return true if the board is in a finished state
+     * manipulates game state based on key that was pressed
+     * @param key key that was pressed
      */
-    public boolean isFinished() {
-        boolean result = true;
-        int lastValue = -1;
-        for (int row = 0; row < this.tiles.length; row++) {
-            for (int col = 0; col < this.tiles[row].length; col++) {
-                int value = this.tiles[row][col].getValue();
-                if (value < lastValue) result = false;
-                lastValue = value;
-            }
-        }
-        return result;
+    public void key(MyKey key) {
+        // swap tiles for associated with the pressed key
+        // System.out.print(Constants.MOVING_LABEL.get(key));
+        // System.out.print(" " +
+        this.moveTile(
+            this.getBlankTileRow() + Constants.MOVING_ROW_DIFF.get(key),
+            this.getBlankTileCol() + Constants.MOVING_COL_DIFF.get(key)
+        );
+        // );
+        this.fireGameUpdateEvent();
     }
-
+    //#endregion
 }
