@@ -18,6 +18,22 @@ public class GameState {
             this.gameUpdateInterface.handle();
         }
     }
+    /**
+     * @return the total distance of all of the tiles to their finished state
+     */
+    public int distanceToFinish() {
+        int result = 0;
+        for (int row = 0; row < Constants.BOARD_SIZE; row++) {
+            for (int col = 0; col < Constants.BOARD_SIZE; col++) {
+                GameTile tile = this.board.getTile(row, col);
+                int distance = tile.distanceToGoal(row, col);
+                // int value = tile.getValue();
+                // int square = Constants.BOARD_SIZE * Constants.BOARD_SIZE;
+                result += distance; // * (square - value) * (square - value) * (square - value) * (square - value);
+            }
+        }
+        return result;
+    }
 
     /**
      * constructor for a Fifteen Game GameState class

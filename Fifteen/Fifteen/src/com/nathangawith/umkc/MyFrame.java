@@ -10,6 +10,15 @@ public class MyFrame extends JFrame {
      * @param game GameState object
      */
     public MyFrame(GameState game) {
+        this(game, true);
+    }
+
+    /**
+     * Window that the game runs inside of
+     * @param game GameState object
+     * @param enableKeyListener if false, user input will not work
+     */
+    public MyFrame(GameState game, boolean enableKeyListener) {
         JPanel panel = new MyPanel(game);
         int boardSize = Constants.BOARD_SIZE * Constants.TILE_WIDTH;
         this.setVisible(true);
@@ -17,7 +26,7 @@ public class MyFrame extends JFrame {
         this.setResizable(false);
         this.setTitle("Fifteen");
         this.add(panel);
-        this.addKeyListener(new MyKeyListener((key) -> game.key(key)));
+        if (enableKeyListener) this.addKeyListener(new MyKeyListener((key) -> game.key(key)));
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setLocation(Constants.WINDOW_X, Constants.WINDOW_Y);
     }
