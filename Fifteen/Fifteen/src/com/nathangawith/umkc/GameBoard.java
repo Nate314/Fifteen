@@ -238,14 +238,10 @@ public class GameBoard {
      * @param key key that was pressed
      */
     public void key(MyKey key) {
-        // swap tiles for associated with the pressed key
-        // System.out.print(Constants.MOVING_LABEL.get(key));
-        // System.out.print(" " +
         this.moveTile(
             this.getBlankTileRow() + Constants.MOVING_ROW_DIFF.get(key),
             this.getBlankTileCol() + Constants.MOVING_COL_DIFF.get(key)
         );
-        // );
         this.fireGameUpdateEvent();
     }
     //#endregion

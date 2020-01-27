@@ -1,7 +1,9 @@
 package com.nathangawith.umkc;
-//#region imports
-import java.util.ArrayList;
-//#endregion
+
+import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
+
 public class AI {
     //#region constructor
     /**
@@ -22,33 +24,50 @@ public class AI {
             if (solvable) {
                 // if the game is solvable generate solution
                 AI_Solver solver = new AI_Solver(new GameBoard(gameBoard));
-                ArrayList<MyKey> moves = solver.history.keyList;
-                // ArrayList<String> states = solver.history.stringifiedBoards;
-                // moves.forEach(move -> System.out.print(move + ", "));
-                // System.out.println();
-                // states.forEach(state -> System.out.print(state + "|"));
-                System.out.println("Tiles:");
-                solver.history.swappedTiles.forEach(tile -> System.out.print(tile + "|"));
-                System.out.println();
-                System.out.println("Distances:");
-                solver.history.distances.forEach(dist -> System.out.print(dist + "|"));
-                System.out.println();
-                System.out.println("Total of " + moves.size() + " moves");
+                GameHistory history = solver.history;
+                this.print(history);
                 // display solution with GUI
-                if (enableGUI) {
-                    MyFrame frame = new MyFrame(gameBoard, false);
-                    try {
-                        Thread.sleep(1000);
-                        for (MyKey move : moves) {
-                            gameBoard.key(move);
-                            Thread.sleep((long) (5000 / moves.size()));
-                        }
-                        Thread.sleep(1000);
-                    } catch (Exception e) {}
-                    frame.dispose();
-                }
+                if (enableGUI) this.showSolutionWithGUI(gameBoard, history);
             }
         }
+    }
+    //#endregion
+    //#region private methods
+    /**
+     * prints historical info to the console
+     * @param history history info about the solve
+     */
+    private void print(GameHistory history) {
+		BiConsumer<String, List<String>> print = (label, arr) -> {
+            System.out.println(label + ":");
+            System.out.println(String.join(", ", arr));
+            System.out.println();
+        };
+        if (Constants.PRINT_MOVES)
+            print.accept("Moves", history.keyList.stream().map(x -> "" + x).collect(Collectors.toList()));
+        if (Constants.PRINT_TILES)
+            print.accept("Tiles", history.swappedTiles.stream().map(x -> "" + x).collect(Collectors.toList()));
+        if (Constants.PRINT_DISTANCES)
+            print.accept("Distances", history.distances.stream().map(x -> "" + x).collect(Collectors.toList()));
+        System.out.println("Total of " + history.keyList.size() + " moves");
+    }
+    /**
+     * Displays the solution to the user
+     * @param gameBoard GameBoard to start with
+     * @param history history of the solve
+     */
+    private void showSolutionWithGUI(GameBoard gameBoard, GameHistory history) {
+        MyFrame frame = new MyFrame(gameBoard, false);
+        try {
+            Thread.sleep(1000);
+            long pause = Math.min((long) (5000 / history.keyList.size()), 500);
+            for (MyKey move : history.keyList) {
+                gameBoard.key(move);
+                Thread.sleep(pause);
+            }
+            Thread.sleep(1000);
+        } catch (Exception e) {}
+        frame.dispose();
     }
     //#endregion
 }

@@ -3,6 +3,20 @@ UMKC CS461 Project1
 # 
 To run this project, execute run.bat
 
+alternatively, you can execute the application with command line arguments like this:
+```
+run +enablegui inputfile:input.txt
+```
+Accepted command line arguments are case sensitive and include:
+```
+Human Mode: +humanmode             // allows a human to play the game rather than the AI
+Enable GUI: +enablegui             // enables the GUI so you can see the puzzle solve itself
+Input File: inputfile:example.txt  // changes the input filename
+Prnt Moves: +printmoves            // prints UP, DOWN, LEFT, RIGHT etc to show what moves the AI are making
+Prnt Dists: +printdistances        // enables the printing of distances from the finished state for each move the AI makes
+Prnt Tiles: -printtiles            // disables the printing of the tiles that are being swapped by the AI
+```
+
 # Assignment Description
 An 8-puzzle is a 3x3 grid of tiles, numbered 1-8, with the last square in the grid being empty.  A tile can be slid into the blank spot, thus changing the configuration of the puzzle.  For example,
 

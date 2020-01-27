@@ -52,16 +52,21 @@ public class AI_IO {
     }
     //#endregion
     //#region java io
+    private String getParityFileName(int counter) {
+        String label = String.format("_%dx%d_", Constants.BOARD_SIZE, Constants.BOARD_SIZE);
+        return Constants.OUTPUT_PARITY_FILE_NAME.split(".txt")[0] + label + counter + ".txt";
+    }
+
     /**
      * retrieves written parities from file
      */
     public HashSet<String> getParities() {
         HashSet<String> result = new HashSet<String>();
         System.out.println();
-        // read all files in the form `${Constants.OUTPUT_PARITY_FILE_NAME - '.txt'}${counter}.txt`
+        // read all files in the form
         int fileCounter = 1;
         while (true) {
-            String filename = Constants.OUTPUT_PARITY_FILE_NAME.split(".txt")[0] + fileCounter + ".txt";
+            String filename = this.getParityFileName(fileCounter);
             System.out.print("\rReading . . . " + filename);
             try {
                 // add each line from files to result
@@ -83,7 +88,7 @@ public class AI_IO {
             out += lines[i] + "\n";
             // output to disk every 10000 lines
             if (i % 10000 == 0) {
-                String filename = Constants.OUTPUT_PARITY_FILE_NAME.split(".txt")[0] + (i / 10000) + ".txt";
+                String filename = this.getParityFileName(i / 10000);
                 System.out.print("\rWriting . . . " + filename);
                 this.writeFile(filename, out);
                 out = "";
