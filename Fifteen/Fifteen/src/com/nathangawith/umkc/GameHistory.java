@@ -11,13 +11,20 @@ public class GameHistory {
     public ArrayList<String> swappedTiles;
     public ArrayList<String> stringifiedBoards;
     //#endregion
-    //#region constructor
+    //#region constructors
     public GameHistory(String initialStringifiedBoard) {
         this.keyList = new ArrayList<MyKey>();
         this.distances = new ArrayList<Integer>();
         this.swappedTiles = new ArrayList<String>();
         this.stringifiedBoards = new ArrayList<String>();
-        this.stringifiedBoards.add(initialStringifiedBoard);
+        if (initialStringifiedBoard != null) this.stringifiedBoards.add(initialStringifiedBoard);
+    }
+    public GameHistory(GameHistory history) {
+        this((String) null);
+        history.keyList.forEach(x -> this.keyList.add(x));
+        history.distances.forEach(x -> this.distances.add(x));
+        history.swappedTiles.forEach(x -> this.swappedTiles.add(x));
+        history.stringifiedBoards.forEach(x -> this.stringifiedBoards.add(x));
     }
     //#endregion
     //#region public methods
@@ -48,35 +55,11 @@ public class GameHistory {
         return result;
     }
 
-    // /**
-    //  * simplifies history
-    //  * console.log(``.split('|').map((v, i) => `(${i}, ${v})`).join(', '));
-    //  */
-    // public void simplify() {
-    //     boolean finished = true;
-    //     int firstIndex, lastIndex;
-    //     for (String stringifiedBoard : stringifiedBoards) {
-    //         firstIndex = stringifiedBoards.indexOf(stringifiedBoard);
-    //         lastIndex = stringifiedBoards.lastIndexOf(stringifiedBoard);
-    //         if (firstIndex != lastIndex) {
-    //             finished = false;
-    //             System.out.println(String.format("%d-%d", firstIndex, lastIndex));
-    //             List<MyKey> newKeyList = this.keyList.subList(0, firstIndex);
-    //             List<Integer> newDistances = this.distances.subList(0, firstIndex);
-    //             List<String> newSwappedTiles = this.swappedTiles.subList(0, firstIndex);
-    //             List<String> newStringifiedBoards = this.stringifiedBoards.subList(0, firstIndex);
-    //             newKeyList.addAll(this.keyList.subList(lastIndex, this.keyList.size()));
-    //             newDistances.addAll(this.distances.subList(lastIndex, this.distances.size()));
-    //             newSwappedTiles.addAll(this.swappedTiles.subList(lastIndex, this.swappedTiles.size()));
-    //             newStringifiedBoards.addAll(this.stringifiedBoards.subList(lastIndex, this.stringifiedBoards.size()));
-    //             this.keyList = (ArrayList<MyKey>) newKeyList.stream().collect(Collectors.toList());
-    //             this.distances = (ArrayList<Integer>) newDistances.stream().collect(Collectors.toList());
-    //             this.swappedTiles = (ArrayList<String>) newSwappedTiles.stream().collect(Collectors.toList());
-    //             this.stringifiedBoards = (ArrayList<String>) newStringifiedBoards.stream().collect(Collectors.toList());
-    //             break;
-    //         }
-    //     }
-    //     if (!finished) this.simplify();
-    // }
+    /**
+     * @return the number of items added to this history object
+     */
+    public int size() {
+        return this.keyList.size();
+    }
     //#endregion
 }

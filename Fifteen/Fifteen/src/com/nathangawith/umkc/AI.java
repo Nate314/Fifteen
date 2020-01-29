@@ -1,9 +1,9 @@
 package com.nathangawith.umkc;
-
+//#region imports
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
-
+//#endregion
 public class AI {
     //#region constructor
     /**
@@ -12,24 +12,25 @@ public class AI {
     public AI(boolean enableGUI) {
         // read in games and calculate invalid parity set
         AI_IO ai_io = new AI_IO();
-        AI_Parity parityChecker = new AI_Parity(ai_io);
         // for each game that is defined in the input file
+        int counter = 0;
         for (GameBoard gameBoard : ai_io.getGameBoards()) {
-            // check if game is solvable or unsolvable and print
-            String gameKey = gameBoard.stringify();
-            boolean solvable = parityChecker.isOfSovableParity(gameKey);
             System.out.println();
             System.out.println("--------------------------------");
-            System.out.println(String.format("%s is %ssolvable", gameKey, solvable ? "" : "un"));
+            // check if game is solvable or unsolvable and print
+            AI_Solver solver = new AI_Solver(new GameBoard(gameBoard));
+            boolean solvable = solver.isSolvable();
+            System.out.println(String.format("%d) is %ssolvable", ++counter, solvable ? "" : "NOT "));
+            gameBoard.print();
             if (solvable) {
-                // if the game is solvable generate solution
-                AI_Solver solver = new AI_Solver(new GameBoard(gameBoard));
                 GameHistory history = solver.history;
                 this.print(history);
                 // display solution with GUI
                 if (enableGUI) this.showSolutionWithGUI(gameBoard, history);
             }
         }
+        System.out.println();
+        System.out.println("--------------------------------");
     }
     //#endregion
     //#region private methods

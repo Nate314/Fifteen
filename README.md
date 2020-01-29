@@ -6,12 +6,16 @@ To run this project, execute run.bat
 alternatively, you can execute the application with command line arguments like this:
 ```
 run +enablegui inputfile:input.txt
+
+// if you want to run with randomly generated boards
+python generate_test_cases.py && run inputfile:output.txt
 ```
 Accepted command line arguments are case sensitive and include:
 ```
 Human Mode: +humanmode             // allows a human to play the game rather than the AI
 Enable GUI: +enablegui             // enables the GUI so you can see the puzzle solve itself
 Input File: inputfile:example.txt  // changes the input filename
+Board Size: boardsize:3            // changes the horizontal and vertical size of the board (by default, the boardsize is 3)
 Prnt Moves: +printmoves            // prints UP, DOWN, LEFT, RIGHT etc to show what moves the AI are making
 Prnt Dists: +printdistances        // enables the printing of distances from the finished state for each move the AI makes
 Prnt Tiles: -printtiles            // disables the printing of the tiles that are being swapped by the AI

@@ -1,5 +1,7 @@
 package com.nathangawith.umkc;
+//#region imports
 import java.util.Arrays;
+//#endregion
 //#region imports
 import java.util.List;
 import java.util.Random;
@@ -23,6 +25,7 @@ public class GameBoard {
     public void setMyEventListener(MyEventInterface listener) { this.gameUpdateInterface = listener; }
     public int getBlankTileRow() { return this.blankTileRow; }
     public int getBlankTileCol() { return this.blankTileCol; }
+    public GameHistory history = new GameHistory((String) null);
     //#endregion
     //#region constructors
     /**
@@ -35,6 +38,11 @@ public class GameBoard {
     public GameBoard(boolean mixItUp) {
         this((c) -> c < Constants.SQUARE_BOARD_SIZE - 1 ? c + 1 : 0);
         if (mixItUp) this.mix();
+    }
+
+    public GameBoard(GameHistory history) {
+        this((c) -> c < Constants.SQUARE_BOARD_SIZE - 1 ? c + 1 : 0);
+        this.history = history;
     }
 
     /**
@@ -72,6 +80,7 @@ public class GameBoard {
             int num = board.getTile(row, col).getValue();
             return num == Constants.SQUARE_BOARD_SIZE ? 0 : num;
         });
+        this.history = new GameHistory(board.history);
     }
 
     /**
@@ -128,7 +137,7 @@ public class GameBoard {
      * @return the total distance of all of the tiles to their finished state
      */
     public int distanceToFinish() {
-        int result = 0;
+        int result = this.history != null ? this.history.size() : 0;
         for (int row = 0; row < Constants.BOARD_SIZE; row++) {
             for (int col = 0; col < Constants.BOARD_SIZE; col++) {
                 GameTile tile = this.getTile(row, col);
@@ -140,19 +149,15 @@ public class GameBoard {
     }
 
     /**
-     * @return true if the board is in a finished state
+     * @return true if the board is in a finished state,
+     *         false if the board is not in a finished state,
+     *         null if the board is not solvable
      */
-    public boolean isFinished() {
-        boolean result = true;
-        int lastValue = -1;
-        for (int row = 0; row < this.tiles.length; row++) {
-            for (int col = 0; col < this.tiles[row].length; col++) {
-                int value = this.tiles[row][col].getValue();
-                if (value < lastValue) result = false;
-                lastValue = value;
-            }
-        }
-        return result;
+    public Boolean isFinished() {
+        String stringified_board = this.stringify();
+        return Constants.STRINGIFIED_IMPOSSIBLE_GAME.equals(stringified_board)
+            ? null : Constants.STRINGIFIED_SOLVED_GAME.equals(stringified_board)
+            ? true : false;
     }
     //#endregion
     //#region stringification

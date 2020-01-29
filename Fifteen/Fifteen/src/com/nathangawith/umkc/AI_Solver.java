@@ -6,7 +6,13 @@ import java.util.HashMap;
 public class AI_Solver {
     //#region fields
     public final GameHistory history;
-    public ArrayList<String> badStates = new ArrayList<String>();
+    private ArrayList<String> visited = new ArrayList<String>();
+    private HashMap<Integer, ArrayList<GameBoard>> options = new HashMap<Integer, ArrayList<GameBoard>>();
+    private Boolean solvable;
+    public boolean isSolvable() {
+        return this.solvable == (Boolean) true ? true
+            : this.solvable == (Boolean) false || this.solvable == (Boolean) null ? false : false;
+    }
     //#endregion
     //#region constructor
     /**
@@ -14,8 +20,20 @@ public class AI_Solver {
      * @param gameBoard GameBoard to solve
      */
     public AI_Solver(GameBoard gameBoard) {
-        this.history = new GameHistory(gameBoard.stringify());
-        while (!gameBoard.isFinished()) gameBoard = this.nextStep(gameBoard);
+        this.solvable = false;
+        gameBoard.history = new GameHistory(gameBoard.stringify());
+        this.addOptions(gameBoard);
+        // if gameBoard.isFinished() returns true or null, the game is finished
+        while (this.solvable == (Boolean) false) {
+            this.visited.add(gameBoard.stringify());
+            gameBoard = this.nextStep(gameBoard);
+            if (gameBoard == null) {
+                System.out.println("ERROR!");
+                break;
+            }
+            this.solvable = gameBoard.isFinished();
+        }
+        this.history = gameBoard.history;
     }
     //#endregion
     //#region private methods
@@ -24,64 +42,37 @@ public class AI_Solver {
      * @return the next GameBoard state
      */
     private GameBoard nextStep(GameBoard gameBoard) {
-        MyKey[] minKeys = this.orderedKeys(gameBoard);
-        for (MyKey minKey : minKeys) {
-            GameBoard temp = new GameBoard(gameBoard);
-            temp.key(minKey);
-            String stringifiedBoard = temp.stringify();
-            if (this.history.stringifiedBoards.contains(stringifiedBoard)
-                || this.badStates.contains(stringifiedBoard)) {
-                    continue;
-            } else {
-                this.history.add(temp.stringify(), minKey, temp.distanceToFinish());
-                return temp;
-            }
-        }
-        this.badStates.add(this.history.pop());
-        return this.nextStep(new GameBoard(this.history.stringifiedBoards.get(this.history.stringifiedBoards.size() - 1).split(",")));
-    }
-
-    /**
-     * wrapper function for
-     * <code>MyKey[] orderedKeys(HashMap<MyKey, Integer> options, MyKey[] result, int index)</code>
-     * @param gameBoard the current gameBoard
-     * @return an ordered list of keys based on score
-     */
-    private MyKey[] orderedKeys(GameBoard gameBoard) {
-        return orderedKeys(new HashMap<MyKey, Integer>() {
-            private static final long serialVersionUID = 1L;
-            public HashMap<MyKey, Integer> init() {
-                Constants.KEYS.stream().forEach(key -> {
-                    GameBoard tempGame = new GameBoard(gameBoard);
-                    tempGame.key(key);
-                    this.put(key, tempGame.distanceToFinish());
-                });
-                return this;
-            }
-        }.init(), new MyKey[Constants.KEYS.size()], 0);
-    }
-
-    /**
-     * @param options a map between keys and the scores of the resulting GameBoards
-     * @param result result that is built recursively
-     * @param index index used to index result recursively
-     * @return an ordered list of keys based on score
-     */
-    private MyKey[] orderedKeys(HashMap<MyKey, Integer> options, MyKey[] result, int index) {
         int min = Integer.MAX_VALUE;
-        MyKey minKey = null;
-        // find key press associated with the minimum score
-        for (MyKey key : options.keySet()) {
-            int val = options.get(key);
-            if (val < min) {
-                min = val;
-                minKey = key;
-            }
+        for (int val : this.options.keySet())
+            if (val < min) min = val;
+        if (this.options.get(min).size() != 0) {
+            GameBoard bestGameBoard = this.options.get(min).remove(0);
+            this.addOptions(bestGameBoard);
+            return bestGameBoard;
+        } else {
+            this.options.remove(min);
+            return this.nextStep(gameBoard);
         }
-        result[index++] = minKey;
-        options.remove(minKey);
-        if (index == Constants.KEYS.size()) return result;
-        else return this.orderedKeys(options, result, index);
+    }
+    /**
+     * adds 0-4 child states to the options HashMap depending on if they have been visited
+     * @param gameBoard current GameBoard
+     */
+    private void addOptions(GameBoard gameBoard) {
+        Constants.KEYS.forEach(key -> {
+            GameBoard temp = new GameBoard(gameBoard);
+            temp.key(key);
+            String stringifiedTempBoard = temp.stringify();
+            if (!stringifiedTempBoard.equals(gameBoard.stringify()) && !this.visited.contains(stringifiedTempBoard)) {
+                temp.history = new GameHistory(gameBoard.history);
+                temp.history.add(temp.stringify(), key, 0);
+                int dist = temp.distanceToFinish();
+                if (!this.options.keySet().contains(dist)) {
+                    this.options.put(dist, new ArrayList<GameBoard>());
+                }
+                this.options.get(dist).add(temp);
+            }
+        });
     }
     //#endregion
 }

@@ -27,8 +27,7 @@ public class GameTile {
         int goalCol = (this.getValue() - 1) % Constants.BOARD_SIZE;
         int horizontalDistance = Math.abs(row - goalRow);
         int verticalDistance = Math.abs(col - goalCol);
-        int importance = Constants.SQUARE_BOARD_SIZE - this.getValue();
-        return (horizontalDistance + verticalDistance) * importance;
+        return (horizontalDistance + verticalDistance);
     }
     //#endregion
 }

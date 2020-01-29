@@ -25,12 +25,12 @@ public final class Constants {
     public static final Color COLOR_MIXING = MD_RED;
     //#endregion
     //#region board sizing integers
-    public static final int BOARD_SIZE = 3;
+    public static int BOARD_SIZE = 3;
     public static final int TILE_WIDTH = 120;
     public static final int GUTTER_SIZE = 6;
     public static final int WINDOW_X = 0; // 1920;
     public static final int WINDOW_Y = 0; // -500;
-    public static final int SQUARE_BOARD_SIZE = Constants.BOARD_SIZE * Constants.BOARD_SIZE;
+    public static int SQUARE_BOARD_SIZE = Constants.BOARD_SIZE * Constants.BOARD_SIZE;
     public static final int PX_BOARD_SIZE = Constants.BOARD_SIZE * Constants.TILE_WIDTH;
     //#endregion
     //#region other constants
@@ -40,10 +40,13 @@ public final class Constants {
     public static final HashMap<MyKey, Integer> MOVING_COL_DIFF = new HashMap<MyKey, Integer>();
     public static final List<MyKey> KEYS = Arrays.asList(new MyKey[] { MyKey.UP, MyKey.DOWN, MyKey.LEFT, MyKey.RIGHT });
     public static long PERMUTATIONS;
+    public static int[] SOLVED_GAME_ARRAY;
+    public static int[] IMPOSSIBLE_GAME_ARRAY;
+    public static String STRINGIFIED_SOLVED_GAME;
+    public static String STRINGIFIED_IMPOSSIBLE_GAME;
     //#endregion
     //#region files
-    public static String FILE_NAME = "program_1_data copy.txt";
-    public static final String OUTPUT_PARITY_FILE_NAME = "unsolvable_parity.txt";
+    public static String FILE_NAME = "program_1_data.txt";
     //#endregion
     //#region printing booleans for AI output
     public static boolean PRINT_MOVES = false;
