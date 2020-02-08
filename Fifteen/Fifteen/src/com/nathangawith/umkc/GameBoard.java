@@ -162,17 +162,18 @@ public class GameBoard {
     //#endregion
     //#region stringification
     /**
-     * prints out console friendly game board
+     * @return a console friendly game board
      */
-    public void print() {
+    public String beautifulStringify() {
+        String result = "";
         for (int row = 0; row < Constants.BOARD_SIZE; row++) {
             for (int col = 0; col < Constants.BOARD_SIZE; col++) {
                 String label = this.tiles[row][col].getLabel();
-                System.out.print((label == null ? " " : label) + " ");
+                result += (label == null ? " " : label) + " ";
             }
-            System.out.println();
+            result += "\n";
         }
-        System.out.println();
+        return result;
     }
 
     /**

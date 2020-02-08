@@ -1,10 +1,21 @@
 package com.nathangawith.umkc;
 //#region imports
 import java.util.List;
-import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 //#endregion
 public class AI {
+    //#region fields
+    private String output = "";
+    private void appendToOutput(String str, boolean println) {
+        this.output += str + (println ? "\n" : "");
+        if (println) System.out.println(str);
+        else System.out.print(str);
+    }
+    private void appendToOutput(String str) {
+        this.appendToOutput(str, true);
+    }
+    //#endregion
     //#region constructor
     /**
      * reads file and prints solutions
@@ -15,42 +26,54 @@ public class AI {
         // for each game that is defined in the input file
         int counter = 0;
         for (GameBoard gameBoard : ai_io.getGameBoards()) {
-            System.out.println();
-            System.out.println("--------------------------------");
+            this.appendToOutput("--------------------------------");
             // check if game is solvable or unsolvable and print
             AI_Solver solver = new AI_Solver(new GameBoard(gameBoard));
             boolean solvable = solver.isSolvable();
-            System.out.println(String.format("%d) is %ssolvable", ++counter, solvable ? "" : "NOT "));
-            gameBoard.print();
+            this.appendToOutput(String.format("(%d) Is %ssolvable", ++counter, solvable ? "" : "NOT "));
+            this.appendToOutput(gameBoard.beautifulStringify());
             if (solvable) {
                 GameHistory history = solver.history;
-                this.print(history);
+                this.appendToOutput(this.printableString(history));
                 // display solution with GUI
                 if (enableGUI) this.showSolutionWithGUI(gameBoard, history);
             }
         }
-        System.out.println();
-        System.out.println("--------------------------------");
+        this.appendToOutput("\n--------------------------------");
+        String input_file = String.format("%s.txt", Constants.FILE_NAME).split(".txt")[0];
+        ai_io.write(String.format("%s_output.txt", input_file), this.output);
     }
     //#endregion
     //#region private methods
     /**
      * prints historical info to the console
      * @param history history info about the solve
+     * @return printable string representing the history
      */
-    private void print(GameHistory history) {
-		BiConsumer<String, List<String>> print = (label, arr) -> {
-            System.out.println(label + ":");
-            System.out.println(String.join(", ", arr));
-            System.out.println();
+    private String printableString(GameHistory history) {
+        String result = "";
+        BiFunction<String, List<String>, String> print = (label, arr) -> {
+            String res = "";
+            res += label + ":\n";
+            res += String.join(", ", arr) + "\n";
+            return res;
         };
+        int depth = 0;
         if (Constants.PRINT_MOVES)
-            print.accept("Moves", history.keyList.stream().map(x -> "" + x).collect(Collectors.toList()));
+            result += print.apply("Moves", history.keyList.stream().map(x -> "" + x).collect(Collectors.toList()));
         if (Constants.PRINT_TILES)
-            print.accept("Tiles", history.swappedTiles.stream().map(x -> "" + x).collect(Collectors.toList()));
-        if (Constants.PRINT_DISTANCES)
-            print.accept("Distances", history.distances.stream().map(x -> "" + x).collect(Collectors.toList()));
-        System.out.println("Total of " + history.keyList.size() + " moves");
+            result += print.apply("Tiles to move", history.swappedTiles.stream().map(x -> "" + x).collect(Collectors.toList()));
+        if (Constants.PRINT_DISTANCES) {
+            result += print.apply("Distances", history.distances.stream().map(x -> "" + x).collect(Collectors.toList()));
+            result += "- ";
+            for (int dist : history.distances) result += String.format("%d, ", depth++);
+            result += "\n";
+            depth = 0;
+            for (int dist : history.distances) result += String.format("%d, ", dist - depth++);
+            result += "\n";
+        }
+        result += "\nTotal of " + history.keyList.size() + " moves";
+        return result;
     }
     /**
      * Displays the solution to the user

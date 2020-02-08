@@ -104,8 +104,6 @@ public class Fifteen {
         }
         Constants.STRINGIFIED_SOLVED_GAME = Constants.STRINGIFIED_SOLVED_GAME.substring(0, Constants.STRINGIFIED_SOLVED_GAME.length() - 1);
         Constants.STRINGIFIED_IMPOSSIBLE_GAME = Constants.STRINGIFIED_IMPOSSIBLE_GAME.substring(0, Constants.STRINGIFIED_IMPOSSIBLE_GAME.length() - 1);
-        System.out.println(Constants.STRINGIFIED_SOLVED_GAME);
-        System.out.println(Constants.STRINGIFIED_IMPOSSIBLE_GAME);
     }
     //#endregion
 }

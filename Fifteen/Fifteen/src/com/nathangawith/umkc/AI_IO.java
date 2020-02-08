@@ -1,7 +1,10 @@
 package com.nathangawith.umkc;
+
 //#region imports
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.BufferedReader;
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -48,6 +51,12 @@ public class AI_IO {
         }
     }
     //#endregion
+    //#region public methods
+    public void write(String filename, String output) {
+        this.writeFile(filename, output);
+        System.out.println(String.format("Wrote contents to file: %s", filename));
+    }
+    //#endregion
     //#region private methods
     /**
      * converts ArrayList<Integer> to Integer[]
@@ -75,6 +84,28 @@ public class AI_IO {
         while ((st = br.readLine()) != null) result += st + '\n';
         br.close();
         return result.split("\n");
+    }
+
+    /**
+     * writes file
+     * code from https://www.w3schools.com/java/java_files_create.asp
+     */
+    private void writeFile(String filename, String output) {
+        try {
+            File myObj = new File(filename);
+            myObj.createNewFile();
+        } catch (IOException e) {
+            System.out.println("An error occurred when creating the file.");
+            e.printStackTrace();
+        }
+        try {
+            FileWriter myWriter = new FileWriter(filename);
+            myWriter.write(output);
+            myWriter.close();
+        } catch (IOException e) {
+            System.out.println("An error occurred when writing the file contents.");
+            e.printStackTrace();
+        }
     }
     //#endregion
 }

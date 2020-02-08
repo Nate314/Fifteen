@@ -65,7 +65,7 @@ public class AI_Solver {
             String stringifiedTempBoard = temp.stringify();
             if (!stringifiedTempBoard.equals(gameBoard.stringify()) && !this.visited.contains(stringifiedTempBoard)) {
                 temp.history = new GameHistory(gameBoard.history);
-                temp.history.add(temp.stringify(), key, 0);
+                temp.history.add(temp.stringify(), key, temp.distanceToFinish());
                 int dist = temp.distanceToFinish();
                 if (!this.options.keySet().contains(dist)) {
                     this.options.put(dist, new ArrayList<GameBoard>());
