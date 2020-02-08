@@ -8,7 +8,7 @@ alternatively, you can execute the application with command line arguments like 
 run +enablegui inputfile:input.txt
 
 // if you want to run with randomly generated boards
-python generate_test_cases.py && run inputfile:output.txt
+python generate_test_cases.py && run inputfile:random_boards.txt
 ```
 Accepted command line arguments are case sensitive and include:
 ```

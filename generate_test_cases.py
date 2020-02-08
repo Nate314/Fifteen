@@ -29,4 +29,4 @@ def output_boards_to_file(boards, filename):
 if __name__ == '__main__':
     BOARD_SIZE = 3
     boards = generate_boards(BOARD_SIZE)
-    output_boards_to_file(boards, 'output.txt')
+    output_boards_to_file(boards, 'random_boards.txt')
