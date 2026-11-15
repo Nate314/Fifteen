@@ -3,3 +3,4 @@ bin
 unsolvable_parity*
 
 program_1_data copy.txt
+.env
