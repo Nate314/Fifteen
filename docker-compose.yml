@@ -1,0 +1,9 @@
+# A console program, not a server: like run.bat, it reads the input file from the project
+# folder, writes <input>_output.txt next to it and exits. It publishes no ports.
+# The GUI modes (+enablegui, +humanmode) need a desktop: use run.bat for those.
+services:
+  fifteen:
+    build: .
+    volumes:
+      - .:/data
+    mem_limit: 512m
